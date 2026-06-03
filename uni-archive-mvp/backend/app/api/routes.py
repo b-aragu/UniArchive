@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_role
 from app.db.database import get_db
 from app.models.user import User
 from app.models.document import Document
@@ -302,6 +302,25 @@ def delete_document(
     db.delete(doc)
     db.commit()
     return None
+
+@router.post("/documents/{document_id}/approve", response_model=DocumentOut)
+def approve_document(
+    document_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role.name not in ["administrator", "moderator"]:
+        raise HTTPException(status_code=403, detail="Not authorized to approve documents")
+        
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found.")
+        
+    doc.is_approved = True
+    doc.status = "approved"
+    db.commit()
+    db.refresh(doc)
+    return doc
 
 @router.get("/documents/{document_id}/duplicates", response_model=list[DuplicatePairOut])
 def get_document_duplicates(document_id: UUID, db: Session = Depends(get_db)):

@@ -27,12 +27,22 @@ export const ModeratorPanel: React.FC = () => {
 
   const handleApprove = async (id: string) => {
     try {
-      // Simulate approval endpoint if it doesn't exist, or call the real one
-      // await apiClient.put(`/api/documents/${id}/approve`);
+      await apiClient.post(`/api/documents/${id}/approve`);
       setDocuments(documents.filter(doc => doc.id !== id));
       alert('Document approved successfully.');
     } catch (err) {
       alert('Failed to approve document.');
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    if (!window.confirm('Are you sure you want to reject and delete this document?')) return;
+    try {
+      await apiClient.delete(`/api/documents/${id}`);
+      setDocuments(documents.filter(doc => doc.id !== id));
+      alert('Document rejected and deleted successfully.');
+    } catch (err) {
+      alert('Failed to reject document.');
     }
   };
 
@@ -80,7 +90,7 @@ export const ModeratorPanel: React.FC = () => {
                   </td>
                   <td style={{ padding: '20px 24px', textAlign: 'right' }}>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                      <button 
+                      <button
                         onClick={() => handleApprove(doc.id)}
                         style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#ecfdf5', color: '#059669', border: '1px solid #a7f3d0', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8125rem', fontWeight: '600', transition: 'all 0.15s ease' }}
                         onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#d1fae5'; }}
@@ -88,7 +98,8 @@ export const ModeratorPanel: React.FC = () => {
                       >
                         <Check size={14} strokeWidth={2.5} /> Approve
                       </button>
-                      <button 
+                      <button
+                        onClick={() => handleReject(doc.id)}
                         style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8125rem', fontWeight: '600', transition: 'all 0.15s ease' }}
                         onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#fee2e2'; }}
                         onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#fef2f2'; }}

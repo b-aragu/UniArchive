@@ -74,8 +74,9 @@ export const AppShell: React.FC = () => {
 
         <div style={{ padding: '16px 20px', borderTop: '1px solid #f3f4f6', backgroundColor: '#fafafa' }}>
           <div style={{ fontSize: '0.8125rem', color: '#6b7280', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <span style={{ fontWeight: '500', color: '#374151', textOverflow: 'ellipsis', overflow: 'hidden' }}>{user?.email}</span>
-            <span style={{ textTransform: 'uppercase', fontSize: '0.6875rem', letterSpacing: '0.05em', color: '#9ca3af' }}>{user?.role}</span>
+            {user?.full_name && <span style={{ fontWeight: '600', color: '#111827', textOverflow: 'ellipsis', overflow: 'hidden' }}>{user.full_name}</span>}
+            <span style={{ fontSize: '0.75rem', color: '#4b5563', textOverflow: 'ellipsis', overflow: 'hidden' }}>{user?.email}</span>
+            <span style={{ textTransform: 'uppercase', fontSize: '0.6875rem', letterSpacing: '0.05em', color: '#2563eb', fontWeight: '700', marginTop: '4px' }}>{user?.role}</span>
           </div>
           <button 
             onClick={handleLogout}

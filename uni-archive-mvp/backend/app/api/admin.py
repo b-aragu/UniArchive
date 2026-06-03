@@ -13,13 +13,10 @@ from app.models import Document, SearchLog, User, DuplicatePair
 from app.schemas import UserDetail
 from app.schemas.document import DuplicatePairOut
 
-# Apply require_role dependency to the entire router
-router = APIRouter(
-    dependencies=[Depends(require_role(["administrator"]))]
-)
+router = APIRouter()
 
 
-@router.get("/users", response_model=list[UserDetail])
+@router.get("/users", response_model=list[UserDetail], dependencies=[Depends(require_role(["administrator"]))])
 def list_users(
     skip: int = 0,
     limit: int = 100,
@@ -32,7 +29,7 @@ def list_users(
     return users
 
 
-@router.get("/reports/system-stats")
+@router.get("/reports/system-stats", dependencies=[Depends(require_role(["administrator"]))])
 def get_system_stats(db: Session = Depends(get_db)):
     """
     Get overall system statistics (Admin only).
@@ -68,7 +65,7 @@ def get_system_stats(db: Session = Depends(get_db)):
     }
 
 
-@router.get("/duplicates", response_model=list[DuplicatePairOut])
+@router.get("/duplicates", response_model=list[DuplicatePairOut], dependencies=[Depends(require_role(["administrator", "moderator"]))])
 def list_duplicates(
     skip: int = 0,
     limit: int = 100,

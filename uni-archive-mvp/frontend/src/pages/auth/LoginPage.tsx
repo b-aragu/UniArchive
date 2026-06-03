@@ -33,19 +33,18 @@ export const LoginPage: React.FC = () => {
       // or 'student' if the backend doesn't provide it.
       // Wait, standard OAuth2 /login usually just returns { access_token, token_type }.
       const token = response.data.access_token;
-      
-      // Attempt to get user role (if your backend returns it or has a /me endpoint)
-      try {
-        // Set token temporarily to fetch /me
-        localStorage.setItem('access_token', token);
-        const meResponse = await apiClient.get('/api/users/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        login(token, meResponse.data.role?.name || 'student');
-      } catch (meError) {
-        // Fallback if /me doesn't exist yet
-        login(token, 'administrator'); 
+      const user = response.data.user;
+
+      if (!user) {
+        throw new Error('User details not returned from server.');
       }
+
+      login(token, {
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role
+      });
       
       navigate('/dashboard');
     } catch (err: any) {

@@ -6,13 +6,14 @@ type UserRole = 'student' | 'moderator' | 'administrator';
 interface User {
   id: string;
   email: string;
+  full_name: string;
   role: UserRole;
 }
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (token: string, role: UserRole) => void;
+  login: (token: string, user: User) => void;
   logout: () => void;
 }
 
@@ -24,31 +25,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // On mount, check if we have a token
     const token = localStorage.getItem('access_token');
+    const id = localStorage.getItem('user_id');
+    const email = localStorage.getItem('user_email');
+    const fullName = localStorage.getItem('user_fullname');
     const role = localStorage.getItem('user_role') as UserRole;
     
-    if (token) {
-      // In a real app, we would fetch user details from /api/users/me here
-      // For MVP, we trust the stored token and role
+    if (token && id && email && role) {
       setUser({
-        id: 'mock-id',
-        email: 'user@uniarchive.local',
-        role: role || 'student'
+        id,
+        email,
+        full_name: fullName || '',
+        role
       });
     }
   }, []);
 
-  const login = (token: string, role: UserRole) => {
+  const login = (token: string, userData: User) => {
     localStorage.setItem('access_token', token);
-    localStorage.setItem('user_role', role);
-    setUser({
-      id: 'mock-id',
-      email: 'user@uniarchive.local',
-      role
-    });
+    localStorage.setItem('user_id', userData.id);
+    localStorage.setItem('user_email', userData.email);
+    localStorage.setItem('user_fullname', userData.full_name);
+    localStorage.setItem('user_role', userData.role);
+    setUser(userData);
   };
 
   const logout = () => {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_email');
+    localStorage.removeItem('user_fullname');
     localStorage.removeItem('user_role');
     setUser(null);
   };
