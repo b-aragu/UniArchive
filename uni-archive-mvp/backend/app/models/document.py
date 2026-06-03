@@ -18,6 +18,7 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Index,
+    Integer,
     String,
     Text,
 )
@@ -74,6 +75,9 @@ class Document(Base):
     # OCR
     ocr_text = Column(Text, nullable=True)
     ocr_confidence = Column(Float, nullable=True)
+    extraction_method = Column(String(50), nullable=True)
+    page_count = Column(Integer, nullable=True)
+    processing_time_ms = Column(Float, nullable=True)
 
     # Duplicate detection
     phash = Column(String(64), nullable=True, index=True)

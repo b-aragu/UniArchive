@@ -66,3 +66,18 @@ This log is an ongoing record of architectural changes, file additions, refactor
   * `[MODIFY]` [`backend/.env.example`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/.env.example)
   * `[MODIFY]` [`backend/app/core/config.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/app/core/config.py)
 * **Outcome:** Users register, log in, refresh sessions, and call secured resources based on role properties. Admins list users and read aggregated stats reports. Keyword search targets the GIN `search_vector` via FTS, yielding relevance scores.
+
+---
+
+### [2026-06-03] — Phase 6: OCR Preprocessing & Fallback Pipeline
+* **Phase:** Phase 6: OCR Implementation
+* **Action:** Integrated OpenCV for image preprocessing, robust fallback logic for PDFs, Tesseract confidence scoring, and OCR metadata tracking in the database.
+* **Files Affected:**
+  * `[NEW]` [`backend/alembic/versions/f1010bb4b221_add_ocr_metadata_fields.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/alembic/versions/f1010bb4b221_add_ocr_metadata_fields.py)
+  * `[NEW]` [`backend/scripts/test_ocr.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/scripts/test_ocr.py)
+  * `[MODIFY]` [`backend/app/models/document.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/app/models/document.py)
+  * `[MODIFY]` [`backend/app/schemas/document.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/app/schemas/document.py)
+  * `[MODIFY]` [`backend/app/services/ocr_service.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/app/services/ocr_service.py)
+  * `[MODIFY]` [`backend/app/api/routes.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/app/api/routes.py)
+  * `[MODIFY]` [`backend/requirements.txt`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/requirements.txt)
+* **Outcome:** The `documents` table now stores `extraction_method`, `page_count`, and `processing_time_ms`. The OCR service intelligently falls back to Tesseract OCR if digital extraction yields insufficient text. The upload endpoint records this metadata without breaking if OCR fails.

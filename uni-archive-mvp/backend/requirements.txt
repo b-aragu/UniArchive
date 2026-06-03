@@ -28,8 +28,10 @@ python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 
 # ========================
-# OCR (existing, not modified in Phase 3/4)
+# OCR
 # ========================
 pytesseract==0.3.13
 Pillow==11.0.0
 PyMuPDF==1.25.1
+opencv-python-headless==4.10.0.84
+numpy==2.0.2

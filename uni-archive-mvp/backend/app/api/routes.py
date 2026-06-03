@@ -69,8 +69,13 @@ async def upload_document(
 
     file_path.write_bytes(content)
 
-    # Basic OCR for Phase 5 (Phase 6 will improve this)
-    ocr_text, ocr_confidence = extract_text_from_file(str(file_path))
+    # Phase 6: OCR Implementation with timing
+    import time
+    start_time = time.time()
+    
+    ocr_text, ocr_confidence, extraction_method, page_count = extract_text_from_file(str(file_path))
+    
+    processing_time_ms = (time.time() - start_time) * 1000.0
 
     doc = Document(
         title=title,
@@ -84,6 +89,9 @@ async def upload_document(
         file_size=len(content),
         ocr_text=ocr_text,
         ocr_confidence=ocr_confidence,
+        extraction_method=extraction_method,
+        page_count=page_count,
+        processing_time_ms=processing_time_ms,
         status="processed",
         # Auto-approve for admins/moderators, pending for students
         is_approved=current_user.role.name in ["administrator", "moderator"]

@@ -42,6 +42,9 @@ class DocumentOut(BaseModel):
     file_size: int | None = None
     ocr_text: str | None = None
     ocr_confidence: float | None = None
+    extraction_method: str | None = None
+    page_count: int | None = None
+    processing_time_ms: float | None = None
     phash: str | None = None
     status: str
     is_approved: bool
