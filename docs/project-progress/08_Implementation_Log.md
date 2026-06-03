@@ -182,3 +182,18 @@ This log is an ongoing record of architectural changes, file additions, refactor
   * `[MODIFY]` `docs/project-progress/01_Project_Status_Report.md`
   * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
 * **Outcome:** Successfully seeded 6 documents, generated text embeddings via CPU model inference, and indexed them into FAISS. Verified vector queries returned the correct documents with high similarity scores. The Phase 7 Semantic Search engine is now confirmed stable and integrated.
+
+---
+
+### [2026-06-03] — Phase 8: Hybrid Search Implementation
+* **Phase:** Phase 8: Hybrid Search (RRF)
+* **Action:** Implemented Reciprocal Rank Fusion (RRF) to merge PostgreSQL Full-Text Search and FAISS Semantic Search results.
+* **Files Affected:**
+  * `[NEW]` `backend/app/services/hybrid_search_service.py`
+  * `[NEW]` `backend/scripts/test_hybrid.py`
+  * `[NEW]` `docs/project-progress/17_Phase_8_Hybrid_Search_Evaluation_Report.md`
+  * `[MODIFY]` `backend/app/api/routes.py`
+  * `[MODIFY]` `backend/app/schemas/document.py`
+  * `[MODIFY]` `docs/project-progress/01_Project_Status_Report.md`
+  * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
+* **Outcome:** The `/api/search/hybrid` endpoint is complete and accurately fuses keyword and semantic results, overriding scores with an optimized `hybrid_score`. The search system is fully operational and queries are automatically tracked in the `search_logs` table.

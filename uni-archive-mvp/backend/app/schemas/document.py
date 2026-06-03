@@ -80,6 +80,19 @@ class SemanticSearchResult(BaseModel):
     ocr_confidence: float | None = None
 
 
+class HybridSearchResult(BaseModel):
+    document_id: str
+    title: str
+    course_code: str | None = None
+    document_type: str | None = None
+    keyword_rank: int | None = None
+    semantic_rank: int | None = None
+    hybrid_score: float
+    matching_chunk: str | None = None
+    extraction_method: str | None = None
+    ocr_confidence: float | None = None
+
+
 class PaginatedDocuments(BaseModel):
     """Paginated response wrapper."""
     items: list[DocumentOut]
