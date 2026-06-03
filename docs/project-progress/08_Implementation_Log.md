@@ -91,3 +91,19 @@ This log is an ongoing record of architectural changes, file additions, refactor
   * `[NEW]` [`docs/project-progress/10_OCR_Verification_Report.md`](file:///home/baragu/Documents/UniArchive/docs/project-progress/10_OCR_Verification_Report.md)
   * `[NEW]` [`backend/scripts/validate_ocr.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/scripts/validate_ocr.py)
 * **Outcome:** Validation confirmed a 100% extraction success rate across the dataset. OpenCV successfully recovered noisy image text (47% confidence), and PyMuPDF isolated digital text in 8.9ms (100% confidence). Tesseract fallback successfully engaged for image-only PDFs (~1s/page, 63% confidence).
+
+---
+
+### [2026-06-03] — Phase 7: Semantic Search Implementation
+* **Phase:** Phase 7: Semantic Search (SBERT & FAISS)
+* **Action:** Integrated `sentence-transformers` and `faiss-cpu` to generate 384-dimensional dense vector embeddings and perform KNN semantic similarity searches.
+* **Files Affected:**
+  * `[NEW]` [`backend/app/services/semantic_service.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/app/services/semantic_service.py)
+  * `[NEW]` [`backend/scripts/backfill_embeddings.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/scripts/backfill_embeddings.py)
+  * `[NEW]` [`backend/scripts/test_semantic.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/scripts/test_semantic.py)
+  * `[NEW]` [`backend/alembic/versions/67503ab82de7_add_faiss_id_to_embeddings.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/alembic/versions/67503ab82de7_add_faiss_id_to_embeddings.py)
+  * `[MODIFY]` [`backend/app/models/embedding.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/app/models/embedding.py)
+  * `[MODIFY]` [`backend/app/api/routes.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/app/api/routes.py)
+  * `[MODIFY]` [`backend/app/schemas/document.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/app/schemas/document.py)
+  * `[MODIFY]` [`backend/requirements.txt`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/requirements.txt)
+* **Outcome:** The `embeddings` table now includes an auto-incrementing `faiss_id`. A new `/api/search/semantic` endpoint routes vector queries, matching against a local FAISS `IndexIDMap`. Document uploads automatically chunk text (500 chars / 50 overlap) and index the resulting embeddings without blocking upload success upon failure.
