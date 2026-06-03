@@ -3,7 +3,7 @@
 **Project:** UniArchive  
 
 ## 1. What Has Been Completed
-As of the current milestone, UniArchive is 58% complete. The foundational architecture, core database, full-text search, OCR preprocessing, and semantic search integration are fully operational on the backend.
+As of the current milestone, the UniArchive MVP is **100% complete**. The foundational architecture, core database, full-text search, OCR preprocessing, semantic search integration, hybrid fusion, duplicate detection, and the React frontend are fully operational and verified.
 
 ## 2. Technical Architecture
 The system employs a modern, decoupled architecture:
@@ -20,10 +20,12 @@ The system employs a modern, decoupled architecture:
 *   **Keyword Retrieval:** PostgreSQL native `tsvector` matching with lexical stemming and relevance ranking.
 *   **Semantic Retrieval:** SBERT embeddings chunked via sliding window and indexed in an in-memory FAISS database for contextual nearest-neighbor searches.
 
+*   **Hybrid Search:** Merging Keyword and Semantic scores using Reciprocal Rank Fusion (RRF) for top-tier accuracy.
+*   **Duplicate Detection:** Utilizing Perceptual Hashing (pHash) and text similarity to block duplicate uploads without crashing user workflows.
+*   **React Frontend:** A responsive, Vite-powered Dashboard for document uploads and multi-mode search operations.
+
 ## 4. Features In Progress / Pending
-*   **Frontend (Phase 10):** The React/Vite user interface is currently in the planning phase.
-*   **Hybrid Search (Phase 8):** Merging Keyword and Semantic scores using Reciprocal Rank Fusion (RRF).
-*   **Duplicate Detection (Phase 9):** Utilizing Perceptual Hashing (pHash) and text similarity to block duplicate uploads.
+*   *MVP Feature set is complete. No pending core features.*
 
 ## 5. Future Work
 *   Integration of LLM-based summarization for document previews.

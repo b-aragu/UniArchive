@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:16
+    container_name: uni_archive_db_prod
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-uniarchive}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-uniarchive}
+      POSTGRES_DB: ${POSTGRES_DB:-uniarchive}
+    volumes:
+      - uni_archive_pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U uniarchive -d uniarchive"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: 
+      context: ./backend
+    container_name: uni_archive_backend_prod
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-uniarchive}:${POSTGRES_PASSWORD:-uniarchive}@db:5432/${POSTGRES_DB:-uniarchive}
+      - JWT_SECRET=${JWT_SECRET:-supersecretkey12345}
+      - JWT_ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+    ports:
+      - "8000:8000"
+    volumes:
+      - uni_archive_uploads:/app/uploads
+      - uni_archive_faiss:/app/faiss_index
+      - uni_archive_models:/root/.cache/huggingface
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: uni_archive_frontend_prod
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  uni_archive_pgdata_prod:
+  uni_archive_uploads:
+  uni_archive_faiss:
+  uni_archive_models:
