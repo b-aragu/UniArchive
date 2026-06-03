@@ -23,8 +23,9 @@ import app.models  # noqa: F401 — ensures all models are imported for autogene
 # this is the Alembic Config object
 config = context.config
 
-# Override sqlalchemy.url from environment if available
-database_url = os.environ.get("DATABASE_URL")
+# Override sqlalchemy.url from Pydantic settings (which parses .env automatically)
+from app.core.config import settings
+database_url = settings.database_url
 if database_url:
     config.set_main_option("sqlalchemy.url", database_url)
 
