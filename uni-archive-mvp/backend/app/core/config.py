@@ -6,6 +6,12 @@ class Settings(BaseSettings):
     upload_dir: str = "uploads"
     max_upload_size_mb: int = 50
 
+    # Authentication
+    jwt_secret: str = "super_secret_jwt_key_for_development_only_change_in_prod"
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 7
+
     class Config:
         env_file = ".env"
 

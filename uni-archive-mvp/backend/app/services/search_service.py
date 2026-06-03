@@ -1,9 +1,18 @@
+"""
+Search service using PostgreSQL Full-Text Search.
+"""
+from __future__ import annotations
+from sqlalchemy import func
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from uuid import UUID
+
 from app.models.document import Document
+from app.models.course import Course
+from app.models.document_type import DocumentType
+
 
 def make_snippet(text: str | None, query: str, size: int = 220) -> str | None:
-    if not text:
+    if not text or not query:
         return None
     lower_text = text.lower()
     lower_query = query.lower()
@@ -14,27 +23,40 @@ def make_snippet(text: str | None, query: str, size: int = 220) -> str | None:
     end = min(idx + len(query) + 140, len(text))
     return ("..." if start > 0 else "") + text[start:end] + ("..." if end < len(text) else "")
 
-def search_documents(db: Session, query: str, course_code: str | None = None, document_type: str | None = None):
-    q = db.query(Document)
+
+def search_documents(
+    db: Session, 
+    query: str, 
+    course_id: UUID | None = None, 
+    document_type_id: UUID | None = None,
+    limit: int = 50
+):
+    q = db.query(Document).filter(Document.is_approved == True)
 
     if query:
-        pattern = f"%{query}%"
-        q = q.filter(
-            or_(
-                Document.title.ilike(pattern),
-                Document.course_code.ilike(pattern),
-                Document.course_name.ilike(pattern),
-                Document.document_type.ilike(pattern),
-                Document.academic_year.ilike(pattern),
-                Document.ocr_text.ilike(pattern),
-            )
-        )
+        # Use basic PostgreSQL FTS using plainto_tsquery on the precomputed search_vector
+        tsquery = func.plainto_tsquery('english', query)
+        q = q.filter(Document.search_vector.op('@@')(tsquery))
+        
+        # Order by rank
+        rank = func.ts_rank(Document.search_vector, tsquery)
+        q = q.order_by(rank.desc())
+    else:
+        q = q.order_by(Document.created_at.desc())
 
-    if course_code:
-        q = q.filter(Document.course_code.ilike(f"%{course_code}%"))
+    if course_id:
+        q = q.filter(Document.course_id == course_id)
 
-    if document_type:
-        q = q.filter(Document.document_type.ilike(f"%{document_type}%"))
+    if document_type_id:
+        q = q.filter(Document.document_type_id == document_type_id)
 
-    docs = q.order_by(Document.created_at.desc()).limit(50).all()
-    return [(doc, make_snippet(doc.ocr_text, query)) for doc in docs]
+    docs = q.limit(limit).all()
+    
+    # Return list of (doc, snippet, score)
+    # Score will be faked to 1.0 for now if no rank
+    results = []
+    for doc in docs:
+        snippet = make_snippet(doc.ocr_text, query) if query else None
+        results.append((doc, snippet, 1.0))
+        
+    return results

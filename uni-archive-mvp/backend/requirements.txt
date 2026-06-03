@@ -22,6 +22,12 @@ python-dotenv==1.0.1
 eval_type_backport>=0.2.0
 
 # ========================
+# Authentication
+# ========================
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# ========================
 # OCR (existing, not modified in Phase 3/4)
 # ========================
 pytesseract==0.3.13
