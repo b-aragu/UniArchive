@@ -1,11 +1,29 @@
+# ========================
+# Web Framework
+# ========================
 fastapi==0.115.6
 uvicorn[standard]==0.34.0
 python-multipart==0.0.20
+
+# ========================
+# Database
+# ========================
 SQLAlchemy==2.0.36
 psycopg2-binary==2.9.10
+alembic==1.14.1
+
+# ========================
+# Validation & Config
+# ========================
 pydantic==2.10.4
 pydantic-settings==2.7.0
+pydantic[email]
 python-dotenv==1.0.1
+eval_type_backport>=0.2.0
+
+# ========================
+# OCR (existing, not modified in Phase 3/4)
+# ========================
 pytesseract==0.3.13
 Pillow==11.0.0
 PyMuPDF==1.25.1

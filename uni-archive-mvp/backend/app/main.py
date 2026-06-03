@@ -1,14 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router
-from app.db.database import Base, engine
 
-Base.metadata.create_all(bind=engine)
+# Import all models so relationships resolve (Alembic also needs this)
+import app.models  # noqa: F401
+
+# NOTE: Database tables are now managed by Alembic migrations.
+# Run: cd backend && alembic upgrade head
 
 app = FastAPI(
     title="UNI ARCHIVE API",
-    description="MVP backend for academic document upload, OCR-ready processing, and retrieval.",
-    version="0.1.0",
+    description="Intelligent Academic Document Retrieval System with OCR and Semantic Search.",
+    version="0.2.0",
 )
 
 app.add_middleware(
