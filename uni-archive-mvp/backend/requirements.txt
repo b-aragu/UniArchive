@@ -35,3 +35,10 @@ Pillow==11.0.0
 PyMuPDF==1.25.1
 opencv-python-headless==4.10.0.84
 numpy==2.0.2
+
+# ========================
+# Semantic Search
+# ========================
+sentence-transformers==3.0.1
+faiss-cpu==1.8.0
+torch==2.3.1
