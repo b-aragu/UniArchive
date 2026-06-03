@@ -197,3 +197,20 @@ This log is an ongoing record of architectural changes, file additions, refactor
   * `[MODIFY]` `docs/project-progress/01_Project_Status_Report.md`
   * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
 * **Outcome:** The `/api/search/hybrid` endpoint is complete and accurately fuses keyword and semantic results, overriding scores with an optimized `hybrid_score`. The search system is fully operational and queries are automatically tracked in the `search_logs` table.
+
+---
+
+### [2026-06-03] — Phase 9: Duplicate Detection Implementation
+* **Phase:** Phase 9: Duplicate Detection
+* **Action:** Integrated perceptual hashing (`pHash`) via `imagehash` and fallback Jaccard text similarity to identify identical or near-duplicate document uploads.
+* **Files Affected:**
+  * `[NEW]` `backend/app/services/duplicate_service.py`
+  * `[NEW]` `backend/scripts/test_duplicates.py`
+  * `[NEW]` `docs/project-progress/18_Phase_9_Duplicate_Detection_Report.md`
+  * `[MODIFY]` `backend/app/api/routes.py`
+  * `[MODIFY]` `backend/app/api/admin.py`
+  * `[MODIFY]` `backend/app/schemas/document.py`
+  * `[MODIFY]` `backend/requirements.txt`
+  * `[MODIFY]` `docs/project-progress/01_Project_Status_Report.md`
+  * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
+* **Outcome:** Uploads are now dynamically scanned against existing records. Duplicates are flagged with a `duplicate_warning` in the response payload and stored in `duplicate_pairs`, exposing endpoints for administrative review without blocking standard user workflows.

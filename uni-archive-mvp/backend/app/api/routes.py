@@ -19,6 +19,8 @@ from app.services.search_service import search_documents
 from app.models.search_log import SearchLog
 from app.services.semantic_service import process_and_store_document, search_semantic
 from app.services.hybrid_search_service import search_hybrid
+from app.services.duplicate_service import compute_phash, detect_duplicates
+from app.schemas.document import DuplicatePairOut
 
 router = APIRouter()
 
@@ -80,6 +82,9 @@ async def upload_document(
     
     processing_time_ms = (time.time() - start_time) * 1000.0
 
+    # Phase 9: Compute pHash before saving
+    phash_value = compute_phash(str(file_path))
+
     doc = Document(
         title=title,
         course_id=course_id,
@@ -95,6 +100,7 @@ async def upload_document(
         extraction_method=extraction_method,
         page_count=page_count,
         processing_time_ms=processing_time_ms,
+        phash=phash_value,
         status="processed",
         # Auto-approve for admins/moderators, pending for students
         is_approved=current_user.role.name in ["administrator", "moderator"]
@@ -104,6 +110,15 @@ async def upload_document(
     db.commit()
     db.refresh(doc)
     
+    # Phase 9: Duplicate Detection
+    duplicates = detect_duplicates(db, doc)
+    
+    # We map doc to DocumentOut dict so we can manually inject duplicate_warning,
+    # or rely on Pydantic to pick it up if we set it as an attribute.
+    doc_out = DocumentOut.model_validate(doc)
+    if duplicates:
+        doc_out.duplicate_warning = duplicates
+    
     # Phase 7: Semantic Indexing
     try:
         if ocr_text:
@@ -112,7 +127,7 @@ async def upload_document(
         import logging
         logging.getLogger(__name__).error(f"Semantic indexing failed for {doc.id}: {e}")
         
-    return doc
+    return doc_out
 
 @router.get("/search", response_model=list[SearchResult])
 def search(
@@ -236,3 +251,25 @@ def delete_document(
     db.delete(doc)
     db.commit()
     return None
+
+@router.get("/documents/{document_id}/duplicates", response_model=list[DuplicatePairOut])
+def get_document_duplicates(document_id: UUID, db: Session = Depends(get_db)):
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found.")
+        
+    pairs = db.query(DuplicatePair).filter(
+        (DuplicatePair.document_a_id == document_id) | (DuplicatePair.document_b_id == document_id)
+    ).all()
+    
+    results = []
+    for p in pairs:
+        other_id = p.document_b_id if p.document_a_id == document_id else p.document_a_id
+        other_doc = db.query(Document).filter(Document.id == other_id).first()
+        
+        data = DuplicatePairOut.model_validate(p)
+        data.document_a_title = doc.title
+        data.document_b_title = other_doc.title if other_doc else "Unknown"
+        results.append(data)
+        
+    return results

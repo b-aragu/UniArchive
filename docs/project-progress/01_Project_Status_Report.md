@@ -27,7 +27,7 @@ This report provides a high-level overview of the current status of the **UniArc
 | **Phase 6** | OCR Preprocessing & Fallback Pipeline | 10% | ✅ Complete | June 3, 2026 |
 | **Phase 7** | Semantic Search (SBERT & FAISS) | 10% | ✅ Complete | June 3, 2026 |
 | **Phase 8** | Hybrid Search (RRF) | 5% | ✅ Complete | June 3, 2026 |
-| **Phase 9** | Duplicate Detection (pHash & Text Similarity) | 5% | ⏳ Not Started | June 22, 2026 |
+| **Phase 9** | Duplicate Detection (pHash & Text Similarity) | 5% | ✅ Complete | June 3, 2026 |
 | **Phase 10**| Frontend Implementation (React/TS/Vite) | 15% | ✅ Complete | July 05, 2026 |
 | **Phase 11**| Final Testing, Demo Prep & Deployment | 15% | ⏳ Prep Started | July 15, 2026 |
 
@@ -43,6 +43,7 @@ This report provides a high-level overview of the current status of the **UniArc
 7. **Python 3.9 Backporting:** Resolved runtime compatibility constraints on the host machine using `eval_type_backport` and `from __future__ import annotations` imports.
 8. **Semantic Search Validation:** Integrated Sentence-BERT (`all-MiniLM-L6-v2`) and FAISS on CPU. Verified document chunking, embeddings generation, and vector retrieval with high relevance scores.
 9. **Hybrid Search (RRF):** Integrated FTS and Semantic Search using Reciprocal Rank Fusion (RRF), deploying a production-ready `/api/search/hybrid` endpoint with structured query logging.
+10. **Duplicate Detection:** Integrated perceptual hashing (`pHash`) and Jaccard text similarity to intercept uploads and flag near-duplicates securely without blocking user interactions.
 
 ---
 
@@ -85,6 +86,7 @@ No technical blockers are currently delaying the project. The following risks ar
 *   [`14_Phase_10_Frontend_Implementation_Report.md`](./14_Phase_10_Frontend_Implementation_Report.md)
 *   [`16_Phase_7_Semantic_Search_Verification_Report.md`](./16_Phase_7_Semantic_Search_Verification_Report.md)
 *   [`17_Phase_8_Hybrid_Search_Evaluation_Report.md`](./17_Phase_8_Hybrid_Search_Evaluation_Report.md)
+*   [`18_Phase_9_Duplicate_Detection_Report.md`](./18_Phase_9_Duplicate_Detection_Report.md)
 
 ### Final Report & Demo
 *   [`../final-report/Chapter1_Introduction.md`](../final-report/Chapter1_Introduction.md)

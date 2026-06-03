@@ -9,8 +9,9 @@ from sqlalchemy.orm import Session
 
 from app.core.security import get_current_user, require_role
 from app.db.database import get_db
-from app.models import Document, SearchLog, User
+from app.models import Document, SearchLog, User, DuplicatePair
 from app.schemas import UserDetail
+from app.schemas.document import DuplicatePairOut
 
 # Apply require_role dependency to the entire router
 router = APIRouter(
@@ -65,3 +66,27 @@ def get_system_stats(db: Session = Depends(get_db)):
             "breakdown": search_breakdown
         }
     }
+
+
+@router.get("/duplicates", response_model=list[DuplicatePairOut])
+def list_duplicates(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    """
+    List all detected duplicate pairs (Admin only).
+    """
+    pairs = db.query(DuplicatePair).order_by(DuplicatePair.detected_at.desc()).offset(skip).limit(limit).all()
+    
+    results = []
+    for p in pairs:
+        doc_a = db.query(Document).filter(Document.id == p.document_a_id).first()
+        doc_b = db.query(Document).filter(Document.id == p.document_b_id).first()
+        
+        data = DuplicatePairOut.model_validate(p)
+        data.document_a_title = doc_a.title if doc_a else "Unknown"
+        data.document_b_title = doc_b.title if doc_b else "Unknown"
+        results.append(data)
+        
+    return results

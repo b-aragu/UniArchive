@@ -50,6 +50,7 @@ class DocumentOut(BaseModel):
     is_approved: bool
     created_at: datetime
     updated_at: datetime
+    duplicate_warning: list[dict] | None = None
 
     class Config:
         from_attributes = True
@@ -100,3 +101,15 @@ class PaginatedDocuments(BaseModel):
     page: int
     page_size: int
     total_pages: int
+
+
+class DuplicatePairOut(BaseModel):
+    id: UUID
+    document_a_id: UUID
+    document_b_id: UUID
+    similarity_score: float
+    detection_method: str
+    detected_at: datetime
+    
+    document_a_title: str | None = None
+    document_b_title: str | None = None
