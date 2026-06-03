@@ -18,6 +18,7 @@ from app.schemas.hierarchy import (
     CourseOut,
     DocumentTypeOut,
     SemesterOut,
+    SemesterDetail,
 )
 
 
@@ -59,7 +60,7 @@ class DocumentOut(BaseModel):
 class DocumentDetail(DocumentOut):
     """Schema for document detail view with expanded relationships."""
     course: CourseOut | None = None
-    semester: SemesterOut | None = None
+    semester: SemesterDetail | None = None
     document_type: DocumentTypeOut | None = None
 
 
@@ -96,7 +97,7 @@ class HybridSearchResult(BaseModel):
 
 class PaginatedDocuments(BaseModel):
     """Paginated response wrapper."""
-    items: list[DocumentOut]
+    items: list[DocumentDetail]
     total: int
     page: int
     page_size: int

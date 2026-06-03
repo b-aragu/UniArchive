@@ -13,7 +13,9 @@ from app.core.security import get_current_user
 from app.db.database import get_db
 from app.models.user import User
 from app.models.document import Document
+from app.models import Course, DocumentType, Semester
 from app.schemas.document import DocumentOut, DocumentDetail, PaginatedDocuments, SearchResult, SemanticSearchResult, HybridSearchResult
+from app.schemas.hierarchy import CourseOut, DocumentTypeOut, SemesterDetail
 from app.services.ocr_service import extract_text_from_file
 from app.services.search_service import search_documents
 from app.models.search_log import SearchLog
@@ -24,29 +26,78 @@ from app.schemas.document import DuplicatePairOut
 
 router = APIRouter()
 
+@router.get("/courses", response_model=list[CourseOut])
+def list_courses(db: Session = Depends(get_db)):
+    return db.query(Course).order_by(Course.code.asc()).all()
+
+@router.get("/document-types", response_model=list[DocumentTypeOut])
+def list_document_types(db: Session = Depends(get_db)):
+    return db.query(DocumentType).order_by(DocumentType.name.asc()).all()
+
+@router.get("/semesters", response_model=list[SemesterDetail])
+def list_semesters(db: Session = Depends(get_db)):
+    return db.query(Semester).order_by(Semester.label.asc()).all()
+
 @router.get("/documents", response_model=PaginatedDocuments)
 def list_documents(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     course_id: UUID | None = None,
     document_type_id: UUID | None = None,
+    semester_id: UUID | None = None,
+    status: str | None = None,
+    title: str | None = None,
+    extraction_method: str | None = None,
+    sort_by: str = Query("newest"),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    q = db.query(Document).filter(Document.is_approved == True)
+    q = db.query(Document)
+    
+    # Role-based restriction:
+    # Students see approved documents OR their own uploads
+    # Moderators and Admins see everything
+    if current_user.role.name == "student":
+        q = q.filter((Document.is_approved == True) | (Document.uploaded_by == current_user.id))
+    
+    # Filters
     if course_id:
         q = q.filter(Document.course_id == course_id)
     if document_type_id:
         q = q.filter(Document.document_type_id == document_type_id)
+    if semester_id:
+        q = q.filter(Document.semester_id == semester_id)
+    if status:
+        q = q.filter(Document.status == status)
+    if title:
+        q = q.filter(Document.title.ilike(f"%{title}%"))
+    if extraction_method:
+        q = q.filter(Document.extraction_method == extraction_method)
         
     total = q.count()
-    items = q.order_by(Document.created_at.desc()).offset(skip).limit(limit).all()
+    
+    # Sorting
+    if sort_by == "oldest":
+        q = q.order_by(Document.created_at.asc())
+    elif sort_by == "title_asc":
+        q = q.order_by(Document.title.asc())
+    elif sort_by == "title_desc":
+        q = q.order_by(Document.title.desc())
+    elif sort_by == "ocr_high":
+        q = q.order_by(Document.ocr_confidence.desc())
+    elif sort_by == "ocr_low":
+        q = q.order_by(Document.ocr_confidence.asc())
+    else: # newest
+        q = q.order_by(Document.created_at.desc())
+        
+    items = q.offset(skip).limit(limit).all()
     
     return {
         "items": items,
         "total": total,
         "page": (skip // limit) + 1,
         "page_size": limit,
-        "total_pages": (total + limit - 1) // limit
+        "total_pages": (total + limit - 1) // limit if total > 0 else 1
     }
 
 @router.post("/upload", response_model=DocumentOut)

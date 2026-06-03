@@ -10,6 +10,7 @@ import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { SearchPage } from './pages/search/SearchPage';
 import { UploadPage } from './pages/documents/UploadPage';
 import { DocumentDetailPage } from './pages/documents/DocumentDetailPage';
+import { DocumentsPage } from './pages/documents/DocumentsPage';
 import { AdminPanel } from './pages/admin/AdminPanel';
 import { ModeratorPanel } from './pages/admin/ModeratorPanel';
 
@@ -27,6 +28,7 @@ export default function App() {
             <Route element={<AppShell />}>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/documents" element={<DocumentsPage />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/upload" element={<UploadPage />} />
               <Route path="/documents/:id" element={<DocumentDetailPage />} />

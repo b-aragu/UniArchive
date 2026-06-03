@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { apiClient } from '../../api/client';
 import { UploadCloud, CheckCircle, AlertCircle, Clock, FileText, Download, Check, Circle, Loader } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -13,6 +13,21 @@ export const UploadPage: React.FC = () => {
   
   const [recentDocuments, setRecentDocuments] = useState<any[]>([]);
   const [recentLoading, setRecentLoading] = useState(true);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleReset = () => {
+    setFile(null);
+    setTitle('');
+    setStatus('idle');
+    setMessage('');
+    setResult(null);
+    setProgressStage(0);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const fetchRecentDocuments = async () => {
     try {
@@ -42,7 +57,32 @@ export const UploadPage: React.FC = () => {
       }
       name = name.replace(/[-_]/g, ' ');
       // Title case
-      name = name.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+      name = name.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase());
+      setTitle(name);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (status === 'uploading') return;
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const selectedFile = e.dataTransfer.files[0];
+      setFile(selectedFile);
+      
+      let name = selectedFile.name;
+      const lastDot = name.lastIndexOf('.');
+      if (lastDot !== -1) {
+        name = name.substring(0, lastDot);
+      }
+      name = name.replace(/[-_]/g, ' ');
+      name = name.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase());
       setTitle(name);
     }
   };
@@ -75,33 +115,48 @@ export const UploadPage: React.FC = () => {
       setProgressStage(4); // All complete
       setStatus('success');
       setMessage('Upload Complete');
-      setResult({
+      const newDoc = {
         ...response.data,
         original_filename: file.name,
         processing_time: ((endTime - startTime) / 1000).toFixed(1)
-      });
-      setFile(null);
-      setTitle('');
+      };
+      setResult(newDoc);
+      // Prepend newly uploaded document instantly
+      setRecentDocuments(prev => [newDoc, ...prev.filter(d => d.id !== newDoc.id)].slice(0, 5));
       fetchRecentDocuments();
     } catch (err: any) {
       clearInterval(stageInterval);
       setStatus('error');
-      setMessage(err.response?.data?.detail || 'An unexpected error occurred during upload.');
+      let errorMsg = 'An unexpected error occurred during upload.';
+      if (err.response?.data?.detail) {
+        if (Array.isArray(err.response.data.detail)) {
+          errorMsg = err.response.data.detail.map((d: any) => `${d.loc ? d.loc.join('.') + ': ' : ''}${d.msg}`).join(', ');
+        } else if (typeof err.response.data.detail === 'string') {
+          errorMsg = err.response.data.detail;
+        } else {
+          errorMsg = JSON.stringify(err.response.data.detail);
+        }
+      }
+      setMessage(errorMsg);
     }
   };
 
-  const handleDownload = async (docId: string, docTitle: string) => {
+  const handleDownload = async (docId: string, filename: string, title: string) => {
+    setDownloadingId(docId);
     try {
       const response = await apiClient.get(`/api/documents/${docId}/download`, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', docTitle + '.pdf');
+      const downloadName = filename || `${title}.pdf`;
+      link.setAttribute('download', downloadName);
       document.body.appendChild(link);
       link.click();
       link.remove();
     } catch (err) {
       alert('Failed to download document.');
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -128,7 +183,6 @@ export const UploadPage: React.FC = () => {
               type="text" 
               value={title} 
               onChange={(e) => setTitle(e.target.value)} 
-              required
               disabled={status === 'uploading'}
               placeholder="e.g. CS304 Operating Systems Final Exam 2024"
               style={{ width: '100%', padding: '12px 16px', border: '1px solid #e5e7eb', borderRadius: '8px', boxSizing: 'border-box', fontSize: '0.9375rem', outline: 'none', transition: 'border-color 0.15s ease', fontFamily: 'inherit', opacity: status === 'uploading' ? 0.7 : 1 }}
@@ -142,12 +196,14 @@ export const UploadPage: React.FC = () => {
             <div style={{ border: '2px dashed #e5e7eb', borderRadius: '12px', padding: '48px 24px', textAlign: 'center', backgroundColor: '#fafafa', cursor: status === 'uploading' ? 'not-allowed' : 'pointer', position: 'relative', transition: 'all 0.2s ease', opacity: status === 'uploading' ? 0.7 : 1 }}
                  onMouseOver={(e) => { if(status !== 'uploading') e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
                  onMouseOut={(e) => { if(status !== 'uploading') e.currentTarget.style.backgroundColor = '#fafafa'; }}
+                 onDragOver={handleDragOver}
+                 onDrop={handleDrop}
             >
               <input 
+                ref={fileInputRef}
                 type="file" 
                 onChange={handleFileChange} 
                 accept=".pdf,.png,.jpg,.jpeg" 
-                required
                 disabled={status === 'uploading'}
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: status === 'uploading' ? 'not-allowed' : 'pointer' }}
               />
@@ -160,13 +216,34 @@ export const UploadPage: React.FC = () => {
           </div>
 
           <button 
-            type="submit" 
-            disabled={status === 'uploading' || !file || !title}
-            style={{ backgroundColor: '#111827', color: 'white', padding: '12px 24px', border: 'none', borderRadius: '8px', fontWeight: '500', fontSize: '0.9375rem', cursor: (status === 'uploading' || !file || !title) ? 'not-allowed' : 'pointer', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'background-color 0.2s ease', opacity: (status === 'uploading' || !file || !title) ? 0.7 : 1 }}
+            type={status === 'success' ? 'button' : 'submit'}
+            onClick={status === 'success' ? handleReset : undefined}
+            disabled={status === 'uploading' || (status === 'idle' && !file)}
+            style={{ 
+              backgroundColor: '#111827', 
+              color: 'white', 
+              padding: '12px 24px', 
+              border: 'none', 
+              borderRadius: '8px', 
+              fontWeight: '500', 
+              fontSize: '0.9375rem', 
+              cursor: (status === 'uploading' || (status === 'idle' && !file)) ? 'not-allowed' : 'pointer', 
+              width: '100%', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '8px', 
+              transition: 'background-color 0.2s ease', 
+              opacity: (status === 'uploading' || (status === 'idle' && !file)) ? 0.7 : 1 
+            }}
           >
-            {status === 'uploading' ? (
-              <><Loader size={18} style={{ animation: 'spin 2s linear infinite' }} /> Uploading and processing...</>
-            ) : 'Upload Document'}
+            {status === 'idle' && !file && 'Select a document first'}
+            {status === 'idle' && file && 'Upload and Extract Text'}
+            {status === 'uploading' && (
+              <><Loader size={18} style={{ animation: 'spin 2s linear infinite' }} /> Uploading, extracting, and indexing...</>
+            )}
+            {status === 'success' && 'Upload Another Document'}
+            {status === 'error' && 'Upload and Extract Text'}
           </button>
         </form>
 
@@ -283,7 +360,7 @@ export const UploadPage: React.FC = () => {
                 View Document
               </Link>
               <button 
-                onClick={() => handleDownload(result.id, result.title)}
+                onClick={() => handleDownload(result.id, result.original_filename, result.title)}
                 style={{ flex: 1, backgroundColor: 'white', color: '#374151', border: '1px solid #d1d5db', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '0.9375rem', transition: 'background-color 0.15s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
@@ -327,30 +404,51 @@ export const UploadPage: React.FC = () => {
              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                {recentDocuments.map((doc) => {
                  const isNewlyUploaded = result && result.id === doc.id;
+                 const hasDuplicates = doc.duplicate_warning && doc.duplicate_warning.length > 0;
+                 const docTypeLabel = typeof doc.document_type === 'object' ? doc.document_type?.name : (doc.document_type || 'Document');
+                 const docCourseLabel = doc.course ? (typeof doc.course === 'object' ? doc.course.code : doc.course) : '';
+                 const semesterLabel = doc.semester?.label || doc.year || '';
+                 
                  return (
                  <li key={doc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid #f3f4f6', transition: 'background-color 0.15s ease', backgroundColor: isNewlyUploaded ? '#f0fdf4' : 'transparent' }} onMouseOver={(e) => { if (!isNewlyUploaded) e.currentTarget.style.backgroundColor = '#fafafa' }} onMouseOut={(e) => { if (!isNewlyUploaded) e.currentTarget.style.backgroundColor = 'transparent' }}>
-                   <div>
-                     <p style={{ margin: '0 0 4px 0', fontWeight: '500', color: '#111827', fontSize: '0.9375rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                   <div style={{ flex: 1, marginRight: '16px' }}>
+                     <p style={{ margin: '0 0 4px 0', fontWeight: '500', color: '#111827', fontSize: '0.9375rem', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                        {doc.title}
                        {isNewlyUploaded && <span style={{ backgroundColor: '#10b981', color: 'white', fontSize: '0.625rem', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 'bold' }}>New</span>}
+                       {hasDuplicates && (
+                         <span style={{ backgroundColor: '#fef2f2', color: '#b91c1c', fontSize: '0.625rem', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                           <AlertCircle size={10} /> Duplicate Warning
+                         </span>
+                       )}
                      </p>
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8125rem', color: '#6b7280' }}>
-                       <span style={{ backgroundColor: isNewlyUploaded ? '#ffffff' : '#f3f4f6', padding: '2px 8px', borderRadius: '12px', fontWeight: '500', color: '#4b5563', border: isNewlyUploaded ? '1px solid #d1fae5' : 'none' }}>{doc.document_type || 'Document'}</span>
-                       {doc.course && <span>• {doc.course} {doc.year ? `(${doc.year})` : ''}</span>}
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8125rem', color: '#6b7280', flexWrap: 'wrap' }}>
+                       <span style={{ backgroundColor: isNewlyUploaded ? '#ffffff' : '#f3f4f6', padding: '2px 8px', borderRadius: '12px', fontWeight: '500', color: '#4b5563', border: isNewlyUploaded ? '1px solid #d1fae5' : 'none' }}>{docTypeLabel}</span>
+                       {docCourseLabel && <span>• {docCourseLabel} {semesterLabel ? `(${semesterLabel})` : ''}</span>}
                        <span>•</span>
-                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: doc.is_approved ? '#059669' : '#d97706' }}>
-                         {doc.is_approved ? 'Verified' : 'Pending'}
+                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: doc.is_approved ? '#059669' : '#d97706', fontWeight: '500' }}>
+                         {doc.is_approved ? 'Verified' : 'Pending Review'}
                        </span>
                      </div>
                    </div>
-                   <Link 
-                     to={`/documents/${doc.id}`}
-                     style={{ backgroundColor: '#ffffff', color: '#374151', border: '1px solid #d1d5db', padding: '6px 16px', borderRadius: '6px', fontSize: '0.8125rem', fontWeight: '600', textDecoration: 'none', transition: 'all 0.15s ease' }}
-                     onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#f9fafb'; }}
-                     onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; }}
-                   >
-                     View
-                   </Link>
+                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                     <Link 
+                       to={`/documents/${doc.id}`}
+                       style={{ backgroundColor: '#ffffff', color: '#374151', border: '1px solid #d1d5db', padding: '6px 14px', borderRadius: '6px', fontSize: '0.8125rem', fontWeight: '600', textDecoration: 'none', transition: 'all 0.15s ease' }}
+                       onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#f9fafb'; }}
+                       onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; }}
+                     >
+                       View
+                     </Link>
+                     <button
+                       disabled={downloadingId === doc.id}
+                       onClick={() => handleDownload(doc.id, doc.original_filename, doc.title)}
+                       style={{ backgroundColor: 'transparent', color: '#2563eb', border: '1px solid #2563eb', padding: '6px 14px', borderRadius: '6px', fontSize: '0.8125rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', transition: 'all 0.15s ease' }}
+                       onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#eff6ff'; }}
+                       onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                     >
+                       <Download size={12} /> {downloadingId === doc.id ? '...' : 'Download'}
+                     </button>
+                   </div>
                  </li>
                )})}
              </ul>

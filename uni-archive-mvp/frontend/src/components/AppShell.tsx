@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, Search, Upload, LayoutDashboard, Shield, LogOut, FileText } from 'lucide-react';
+import { BookOpen, Search, Upload, LayoutDashboard, Shield, LogOut, FileText, Library } from 'lucide-react';
 
 export const AppShell: React.FC = () => {
   const { user, logout } = useAuth();
@@ -15,6 +15,7 @@ export const AppShell: React.FC = () => {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} /> },
+    { name: 'Documents', path: '/documents', icon: <Library size={20} /> },
     { name: 'Search', path: '/search', icon: <Search size={20} /> },
     { name: 'Upload', path: '/upload', icon: <Upload size={20} /> },
   ];
