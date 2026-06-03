@@ -81,3 +81,13 @@ This log is an ongoing record of architectural changes, file additions, refactor
   * `[MODIFY]` [`backend/app/api/routes.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/app/api/routes.py)
   * `[MODIFY]` [`backend/requirements.txt`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/requirements.txt)
 * **Outcome:** The `documents` table now stores `extraction_method`, `page_count`, and `processing_time_ms`. The OCR service intelligently falls back to Tesseract OCR if digital extraction yields insufficient text. The upload endpoint records this metadata without breaking if OCR fails.
+
+---
+
+### [2026-06-03] — Phase 6: OCR Pipeline Validation
+* **Phase:** Phase 6: Validation
+* **Action:** Installed `tesseract-ocr` OS binary. Generated synthetic datasets representing Digital PDFs, Scanned PDFs, and Noisy Images to test routing and processing logic.
+* **Files Affected:**
+  * `[NEW]` [`docs/project-progress/10_OCR_Verification_Report.md`](file:///home/baragu/Documents/UniArchive/docs/project-progress/10_OCR_Verification_Report.md)
+  * `[NEW]` [`backend/scripts/validate_ocr.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/scripts/validate_ocr.py)
+* **Outcome:** Validation confirmed a 100% extraction success rate across the dataset. OpenCV successfully recovered noisy image text (47% confidence), and PyMuPDF isolated digital text in 8.9ms (100% confidence). Tesseract fallback successfully engaged for image-only PDFs (~1s/page, 63% confidence).

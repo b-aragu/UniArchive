@@ -1,0 +1,83 @@
+[
+  {
+    "file_name": "sample_image_1.png",
+    "file_type": "PNG",
+    "extraction_method": "image_ocr",
+    "processing_time_ms": 1131.69,
+    "ocr_confidence": 47.12,
+    "extracted_character_count": 23,
+    "success": true
+  },
+  {
+    "file_name": "sample_image_2.png",
+    "file_type": "PNG",
+    "extraction_method": "image_ocr",
+    "processing_time_ms": 1153.08,
+    "ocr_confidence": 47.5,
+    "extracted_character_count": 23,
+    "success": true
+  },
+  {
+    "file_name": "sample_image_3.png",
+    "file_type": "PNG",
+    "extraction_method": "image_ocr",
+    "processing_time_ms": 570.94,
+    "ocr_confidence": 47.5,
+    "extracted_character_count": 23,
+    "success": true
+  },
+  {
+    "file_name": "sample_digital_pdf_1.pdf",
+    "file_type": "PDF",
+    "extraction_method": "digital_pdf",
+    "processing_time_ms": 19.07,
+    "ocr_confidence": 100.0,
+    "extracted_character_count": 464,
+    "success": true
+  },
+  {
+    "file_name": "sample_digital_pdf_2.pdf",
+    "file_type": "PDF",
+    "extraction_method": "digital_pdf",
+    "processing_time_ms": 4.0,
+    "ocr_confidence": 100.0,
+    "extracted_character_count": 464,
+    "success": true
+  },
+  {
+    "file_name": "sample_digital_pdf_3.pdf",
+    "file_type": "PDF",
+    "extraction_method": "digital_pdf",
+    "processing_time_ms": 3.69,
+    "ocr_confidence": 100.0,
+    "extracted_character_count": 464,
+    "success": true
+  },
+  {
+    "file_name": "sample_scanned_pdf_1.pdf",
+    "file_type": "PDF",
+    "extraction_method": "scanned_pdf_ocr",
+    "processing_time_ms": 1164.0,
+    "ocr_confidence": 63.05,
+    "extracted_character_count": 94,
+    "success": true
+  },
+  {
+    "file_name": "sample_scanned_pdf_2.pdf",
+    "file_type": "PDF",
+    "extraction_method": "scanned_pdf_ocr",
+    "processing_time_ms": 1044.81,
+    "ocr_confidence": 63.1,
+    "extracted_character_count": 94,
+    "success": true
+  },
+  {
+    "file_name": "sample_scanned_pdf_3.pdf",
+    "file_type": "PDF",
+    "extraction_method": "scanned_pdf_ocr",
+    "processing_time_ms": 1048.89,
+    "ocr_confidence": 62.86,
+    "extracted_character_count": 94,
+    "success": true
+  }
+]
