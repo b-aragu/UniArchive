@@ -242,3 +242,14 @@ This log is an ongoing record of architectural changes, file additions, refactor
   * `[MODIFY]` `docs/project-progress/01_Project_Status_Report.md`
   * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
 * **Outcome:** The frontend application is now fully polished, type-safe, and capable of gracefully handling restricted access paths. All UI states accurately reflect the MVP requirements and backend interactions. The UniArchive MVP is fully completed and Demo-Ready.
+
+---
+
+### [2026-06-03] — Upload Experience Improvement
+* **Phase:** Phase 11: Final Polish
+* **Action:** Redesigned the document upload UI to provide an immediate "Upload Complete" panel containing comprehensive document metadata (extraction method, page count, processing time), integrated a 400-character OCR text preview directly in the success state, and added a dynamic "Recent Uploads" list.
+* **Files Affected:**
+  * `[MODIFY]` `frontend/src/pages/documents/UploadPage.tsx`
+  * `[MODIFY]` `docs/project-progress/20_Final_UI_Functionality_Polish_Report.md`
+  * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
+* **Outcome:** The upload process now gives immediate, highly-detailed feedback without requiring the user to navigate away. The application successfully passes all build tests.
