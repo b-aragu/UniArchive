@@ -15,6 +15,10 @@ To balance speed and accuracy, a cascading fallback pipeline was designed:
 3.  **Optical Extraction (Tesseract):** The cleaned images are passed to Tesseract OCR to extract the final string.
 
 ## 3.4 Search Methodology
-The system employs a dual-index approach:
+The system employs a multi-index approach:
 *   **Lexical Search:** PostgreSQL's native `tsvector` and `tsquery` utilize GIN indexing and English language stemming for lightning-fast keyword retrieval.
 *   **Semantic Search:** OCR text is chunked into 500-character segments with a 50-character overlap. These chunks are embedded into 384-dimensional vectors using `all-MiniLM-L6-v2` and indexed via FAISS (`IndexFlatIP`) for Inner-Product cosine similarity retrieval.
+*   **Hybrid Search:** Utilizing Reciprocal Rank Fusion (RRF), the lexical and semantic result lists are combined. This mathematical technique recalculates scores based on the inverse of their rank position, pushing documents that score highly in *both* keyword and context to the very top.
+
+## 3.5 Duplicate Detection Methodology
+To prevent storage redundancy, uploaded documents are fingerprinted. Image-based documents (or the first page of PDFs) are processed via Perceptual Hashing (pHash). A 64-bit hash is generated, and a Hamming distance <= 15 is used to detect visual duplicates. For text-only digital documents, a fallback Jaccard word-level similarity algorithm is applied.

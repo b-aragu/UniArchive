@@ -9,6 +9,8 @@ SQLAlchemy 2.0 was utilized as the Object Relational Mapper (ORM). Alembic was i
 ## 4.3 OCR Implementation
 The `ocr_service.py` module encapsulates the extraction logic. `pdf2image` handles rasterization of PDFs at 300 DPI to ensure sufficient resolution for Tesseract. The OpenCV pipeline dynamically adjusts image contrast before passing it to `pytesseract`. Performance logging was wrapped around these calls to monitor the extraction time (milliseconds for digital vs seconds for optical).
 
-## 4.4 Semantic Search Implementation
-*This section will be expanded upon fully verifying Phase 8 Hybrid Search.* 
-The `semantic_service.py` module utilizes `sentence-transformers`. A singleton pattern was implemented to load the `all-MiniLM-L6-v2` model into memory only once upon application startup, preventing heavy load times on individual API requests. The FAISS index is persisted to the local disk and automatically rebuilt if a mismatch between the database and the index is detected.
+## 4.4 Semantic & Hybrid Search Implementation
+The `semantic_service.py` module utilizes `sentence-transformers`. A singleton pattern was implemented to load the `all-MiniLM-L6-v2` model into memory only once upon application startup, preventing heavy load times on individual API requests. The FAISS index is persisted to the local disk and automatically rebuilt if a mismatch between the database and the index is detected. The `hybrid_search_service.py` orchestrates parallel execution of PostgreSQL and FAISS queries, merging the results via the RRF formula in `O(n log n)` time.
+
+## 4.5 Duplicate Detection Implementation
+The `duplicate_service.py` module uses the `imagehash` library to generate the pHash signature. This is invoked in the `/api/upload` route. Rather than rejecting the user's upload outright (which causes poor UX), the system stores the file, logs a `DuplicatePair` in the database for admin review, and returns a non-blocking `duplicate_warning` in the JSON response payload.
