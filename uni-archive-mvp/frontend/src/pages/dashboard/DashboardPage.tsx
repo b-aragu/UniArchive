@@ -45,74 +45,80 @@ export const DashboardPage: React.FC = () => {
   return (
     <div>
       <div style={{ display: 'flex', gap: '16px', marginBottom: '32px' }}>
-        <button onClick={() => navigate('/upload')} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#3b82f6', color: 'white', padding: '12px 24px', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '1rem' }}>
-          <UploadCloud size={20} /> Upload Document
+        <button onClick={() => navigate('/upload')} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#2563eb', color: 'white', padding: '10px 20px', border: '1px solid transparent', borderRadius: '8px', fontWeight: '500', cursor: 'pointer', fontSize: '0.9375rem', boxShadow: '0 1px 2px rgba(37,99,235,0.2)', transition: 'background-color 0.15s ease' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}>
+          <UploadCloud size={18} strokeWidth={2} /> Upload Document
         </button>
-        <button onClick={() => navigate('/search')} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#111827', color: 'white', padding: '12px 24px', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '1rem' }}>
-          <SearchIcon size={20} /> Search Archive
+        <button onClick={() => navigate('/search')} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#ffffff', color: '#111827', padding: '10px 20px', border: '1px solid #d1d5db', borderRadius: '8px', fontWeight: '500', cursor: 'pointer', fontSize: '0.9375rem', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', transition: 'all 0.15s ease' }} onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#f9fafb'; e.currentTarget.style.borderColor = '#9ca3af'; }} onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#d1d5db'; }}>
+          <SearchIcon size={18} strokeWidth={2} /> Search Archive
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ backgroundColor: '#eff6ff', padding: '12px', borderRadius: '8px' }}><FileText color="#3b82f6" /></div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+        <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ backgroundColor: '#eff6ff', padding: '12px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FileText color="#2563eb" size={24} strokeWidth={1.5} /></div>
           <div>
-            <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>Total Documents</p>
-            <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>{stats?.documents?.total !== undefined ? stats.documents.total : documents.length}</p>
+            <p style={{ margin: 0, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>Total Documents</p>
+            <p style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: '700', color: '#111827', letterSpacing: '-0.025em' }}>{stats?.documents?.total !== undefined ? stats.documents.total : documents.length}</p>
           </div>
         </div>
         
         {user?.role === 'administrator' && (
           <>
-            <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ backgroundColor: '#ecfdf5', padding: '12px', borderRadius: '8px' }}><Users color="#10b981" /></div>
+            <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ backgroundColor: '#ecfdf5', padding: '12px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Users color="#059669" size={24} strokeWidth={1.5} /></div>
               <div>
-                <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>Total Users</p>
-                <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>{stats?.users?.total !== undefined ? stats.users.total : '-'}</p>
+                <p style={{ margin: 0, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>Total Users</p>
+                <p style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: '700', color: '#111827', letterSpacing: '-0.025em' }}>{stats?.users?.total !== undefined ? stats.users.total : '-'}</p>
               </div>
             </div>
             
-            <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ backgroundColor: '#f3e8ff', padding: '12px', borderRadius: '8px' }}><SearchIcon color="#a855f7" /></div>
+            <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ backgroundColor: '#f5f3ff', padding: '12px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><SearchIcon color="#7c3aed" size={24} strokeWidth={1.5} /></div>
               <div>
-                <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>Total Searches</p>
-                <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>{stats?.searches?.total !== undefined ? stats.searches.total : '-'}</p>
+                <p style={{ margin: 0, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>Total Searches</p>
+                <p style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: '700', color: '#111827', letterSpacing: '-0.025em' }}>{stats?.searches?.total !== undefined ? stats.searches.total : '-'}</p>
               </div>
             </div>
           </>
         )}
 
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ backgroundColor: '#fef3c7', padding: '12px', borderRadius: '8px' }}><Clock color="#f59e0b" /></div>
+        <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ backgroundColor: '#fffbeb', padding: '12px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Clock color="#d97706" size={24} strokeWidth={1.5} /></div>
           <div>
-            <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>Pending Review</p>
-            <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>{stats?.documents?.pending !== undefined ? stats.documents.pending : '-'}</p>
+            <p style={{ margin: 0, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>Pending Review</p>
+            <p style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: '700', color: '#111827', letterSpacing: '-0.025em' }}>{stats?.documents?.pending !== undefined ? stats.documents.pending : '-'}</p>
           </div>
         </div>
       </div>
 
-      <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '24px' }}>
-        <h3 style={{ margin: '0 0 16px 0', fontSize: '1.125rem', color: '#111827' }}>Recently Added</h3>
-        {loading ? (
-          <p style={{ color: '#6b7280' }}>Loading documents...</p>
-        ) : error ? (
-          <p style={{ color: '#ef4444' }}>{error}</p>
-        ) : documents.length === 0 ? (
-          <p style={{ color: '#6b7280' }}>No documents found.</p>
-        ) : (
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            {documents.map((doc) => (
-              <li key={doc.id} style={{ padding: '12px 0', borderBottom: '1px solid #f3f4f6' }}>
-                <Link to={`/documents/${doc.id}`} style={{ textDecoration: 'none', color: '#111827', fontWeight: '500' }}>
-                  {doc.title}
-                </Link>
-                <div style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '4px' }}>
-                  Extracted via {doc.extraction_method || 'Unknown'} | {new Date(doc.created_at).toLocaleDateString()}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+      <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', overflow: 'hidden' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6', backgroundColor: '#fafafa' }}>
+          <h3 style={{ margin: 0, fontSize: '1.0625rem', color: '#111827', fontWeight: '600', letterSpacing: '-0.01em' }}>Recently Added</h3>
+        </div>
+        <div style={{ padding: '0' }}>
+          {loading ? (
+            <div style={{ padding: '32px', color: '#6b7280', textAlign: 'center', fontSize: '0.9375rem' }}>Loading documents...</div>
+          ) : error ? (
+            <div style={{ padding: '32px', color: '#ef4444', textAlign: 'center', fontSize: '0.9375rem' }}>{error}</div>
+          ) : documents.length === 0 ? (
+            <div style={{ padding: '48px', color: '#9ca3af', textAlign: 'center', fontSize: '0.9375rem' }}>No documents found.</div>
+          ) : (
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              {documents.map((doc) => (
+                <li key={doc.id} style={{ padding: '16px 24px', borderBottom: '1px solid #f3f4f6', transition: 'background-color 0.15s ease' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#fafafa'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <Link to={`/documents/${doc.id}`} style={{ textDecoration: 'none', color: '#111827', fontWeight: '500', fontSize: '0.9375rem', display: 'block' }}>
+                    {doc.title}
+                  </Link>
+                  <div style={{ fontSize: '0.8125rem', color: '#6b7280', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ backgroundColor: '#f3f4f6', padding: '2px 6px', borderRadius: '4px', color: '#4b5563', fontWeight: '500' }}>{doc.extraction_method || 'Unknown'}</span>
+                    <span>•</span>
+                    <span>{new Date(doc.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );

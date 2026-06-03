@@ -30,65 +30,82 @@ export const AdminPanel: React.FC = () => {
   }, []);
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-        <Shield size={28} color="#1f2937" />
-        <h2 style={{ margin: 0, fontSize: '1.5rem', color: '#111827' }}>System Administration</h2>
+    <div style={{ maxWidth: '1000px', margin: '0 auto', paddingBottom: '40px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+        <div style={{ backgroundColor: '#f3f4f6', padding: '10px', borderRadius: '12px' }}>
+          <Shield size={24} color="#111827" strokeWidth={2} />
+        </div>
+        <h2 style={{ margin: 0, fontSize: '1.75rem', color: '#111827', fontWeight: '700', letterSpacing: '-0.025em' }}>System Administration</h2>
       </div>
 
       {error && (
-        <div style={{ padding: '16px', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', color: '#92400e', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <AlertTriangle size={20} />
+        <div style={{ padding: '20px', backgroundColor: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '12px', color: '#92400e', marginBottom: '32px', display: 'flex', alignItems: 'flex-start', gap: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <AlertTriangle size={24} strokeWidth={1.5} style={{ flexShrink: 0, marginTop: '2px' }} />
           <div>
-            <strong>Warning:</strong> {error}
-            <br />
-            <span style={{ fontSize: '0.875rem' }}>This endpoint might not be fully implemented in the backend MVP yet.</span>
+            <strong style={{ fontSize: '1rem', display: 'block', marginBottom: '4px' }}>API Connection Warning</strong>
+            <span style={{ fontSize: '0.9375rem', lineHeight: '1.5' }}>{error}</span>
+            <div style={{ fontSize: '0.8125rem', marginTop: '8px', color: '#b45309' }}>This endpoint might not be fully implemented in the backend MVP yet.</div>
           </div>
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ backgroundColor: '#eff6ff', padding: '12px', borderRadius: '8px' }}><Users color="#3b82f6" /></div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', marginBottom: '40px' }}>
+        <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ backgroundColor: '#eff6ff', padding: '12px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Users color="#2563eb" size={24} strokeWidth={1.5} /></div>
           <div>
-            <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>Total Users</p>
-            <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>{stats?.users?.total !== undefined ? stats.users.total : '-'}</p>
+            <p style={{ margin: 0, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>Total Users</p>
+            <p style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: '700', color: '#111827', letterSpacing: '-0.025em' }}>{stats?.users?.total !== undefined ? stats.users.total : '-'}</p>
           </div>
         </div>
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ backgroundColor: '#ecfdf5', padding: '12px', borderRadius: '8px' }}><Server color="#10b981" /></div>
+        <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ backgroundColor: '#ecfdf5', padding: '12px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Server color="#059669" size={24} strokeWidth={1.5} /></div>
           <div>
-            <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>Total Documents</p>
-            <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>{stats?.documents?.total !== undefined ? stats.documents.total : '-'}</p>
+            <p style={{ margin: 0, fontSize: '0.8125rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>Total Documents</p>
+            <p style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: '700', color: '#111827', letterSpacing: '-0.025em' }}>{stats?.documents?.total !== undefined ? stats.documents.total : '-'}</p>
           </div>
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-          <h3 style={{ margin: '0 0 16px 0', fontSize: '1.125rem', color: '#111827' }}>Detected Duplicates</h3>
-          {duplicates.length === 0 ? (
-            <div style={{ color: '#6b7280', fontSize: '0.875rem', padding: '24px', textAlign: 'center', backgroundColor: '#f9fafb', borderRadius: '6px', border: '1px dashed #d1d5db' }}>
-              No duplicate documents detected.
-            </div>
-          ) : (
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              {duplicates.map(dup => (
-                <li key={dup.id} style={{ padding: '12px', borderBottom: '1px solid #f3f4f6', fontSize: '0.875rem' }}>
-                  <div style={{ fontWeight: '500', color: '#111827' }}>{dup.document_a_title}</div>
-                  <div style={{ color: '#6b7280', margin: '4px 0' }}>appears similar to</div>
-                  <div style={{ fontWeight: '500', color: '#111827' }}>{dup.document_b_title}</div>
-                  <div style={{ marginTop: '8px', fontSize: '0.75rem', color: '#b45309', backgroundColor: '#fffbeb', padding: '4px 8px', borderRadius: '4px', display: 'inline-block' }}>Hamming Distance: {dup.hamming_distance}</div>
-                </li>
-              ))}
-            </ul>
-          )}
+        <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', overflow: 'hidden' }}>
+          <div style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6', backgroundColor: '#fafafa' }}>
+            <h3 style={{ margin: 0, fontSize: '1.0625rem', color: '#111827', fontWeight: '600', letterSpacing: '-0.01em' }}>Detected Duplicates</h3>
+          </div>
+          <div style={{ padding: '0' }}>
+            {duplicates.length === 0 ? (
+              <div style={{ color: '#9ca3af', fontSize: '0.9375rem', padding: '48px 24px', textAlign: 'center' }}>
+                No duplicate documents detected.
+              </div>
+            ) : (
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {duplicates.map((dup, index) => (
+                  <li key={dup.id || index} style={{ padding: '16px 24px', borderBottom: '1px solid #f3f4f6', fontSize: '0.9375rem' }}>
+                    <div style={{ fontWeight: '600', color: '#111827', marginBottom: '4px' }}>{dup.document_a_title}</div>
+                    <div style={{ color: '#6b7280', fontSize: '0.8125rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ height: '1px', backgroundColor: '#e5e7eb', flex: 1 }}></span>
+                      appears similar to
+                      <span style={{ height: '1px', backgroundColor: '#e5e7eb', flex: 1 }}></span>
+                    </div>
+                    <div style={{ fontWeight: '600', color: '#111827', marginTop: '4px' }}>{dup.document_b_title}</div>
+                    <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', color: '#b45309', backgroundColor: '#fffbeb', border: '1px solid #fef3c7', padding: '4px 10px', borderRadius: '12px', fontWeight: '600', letterSpacing: '0.025em' }}>Hamming Distance: {dup.hamming_distance}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
 
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-          <h3 style={{ margin: '0 0 16px 0', fontSize: '1.125rem', color: '#111827' }}>User Management</h3>
-          <div style={{ color: '#6b7280', fontSize: '0.875rem', padding: '24px', textAlign: 'center', backgroundColor: '#f9fafb', borderRadius: '6px', border: '1px dashed #d1d5db' }}>
-            User list will be populated here once the `/api/admin/users` endpoint is fully integrated.
+        <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', overflow: 'hidden' }}>
+          <div style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6', backgroundColor: '#fafafa' }}>
+            <h3 style={{ margin: 0, fontSize: '1.0625rem', color: '#111827', fontWeight: '600', letterSpacing: '-0.01em' }}>User Management</h3>
+          </div>
+          <div style={{ padding: '48px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '200px' }}>
+            <div style={{ backgroundColor: '#f3f4f6', padding: '16px', borderRadius: '50%', marginBottom: '16px' }}>
+              <Users size={32} color="#9ca3af" strokeWidth={1.5} />
+            </div>
+            <p style={{ margin: 0, color: '#6b7280', fontSize: '0.9375rem', maxWidth: '80%' }}>User list will be populated here once the <code style={{ backgroundColor: '#f3f4f6', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8125rem' }}>/api/admin/users</code> endpoint is fully integrated.</p>
           </div>
         </div>
       </div>

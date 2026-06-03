@@ -42,9 +42,10 @@ export const UploadPage: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <h3 style={{ margin: '0 0 24px 0', fontSize: '1.25rem', color: '#111827' }}>Upload Academic Document</h3>
+    <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+      <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.025)', border: '1px solid #f3f4f6' }}>
+        <h3 style={{ margin: '0 0 8px 0', fontSize: '1.25rem', fontWeight: '600', color: '#111827', letterSpacing: '-0.025em' }}>Upload Academic Document</h3>
+        <p style={{ margin: '0 0 32px 0', fontSize: '0.9375rem', color: '#6b7280' }}>Upload your PDF or scanned image to the archive. Text will be automatically extracted and indexed.</p>
 
         <form onSubmit={handleUpload}>
           <div style={{ marginBottom: '24px' }}>
@@ -55,13 +56,18 @@ export const UploadPage: React.FC = () => {
               onChange={(e) => setTitle(e.target.value)} 
               required
               placeholder="e.g. CS304 Operating Systems Final Exam 2024"
-              style={{ width: '100%', padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: '6px', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '12px 16px', border: '1px solid #e5e7eb', borderRadius: '8px', boxSizing: 'border-box', fontSize: '0.9375rem', outline: 'none', transition: 'border-color 0.15s ease', fontFamily: 'inherit' }}
+              onFocus={(e) => e.target.style.borderColor = '#2563eb'}
+              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
             />
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
+          <div style={{ marginBottom: '32px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>File (PDF/Image)</label>
-            <div style={{ border: '2px dashed #d1d5db', borderRadius: '6px', padding: '40px', textAlign: 'center', backgroundColor: '#f9fafb', cursor: 'pointer', position: 'relative' }}>
+            <div style={{ border: '2px dashed #e5e7eb', borderRadius: '12px', padding: '48px 24px', textAlign: 'center', backgroundColor: '#fafafa', cursor: 'pointer', position: 'relative', transition: 'all 0.2s ease' }}
+                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#fafafa'}
+            >
               <input 
                 type="file" 
                 onChange={handleFileChange} 
@@ -69,17 +75,22 @@ export const UploadPage: React.FC = () => {
                 required
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
               />
-              <UploadCloud size={40} color="#9ca3af" style={{ margin: '0 auto 16px auto' }} />
-              <p style={{ margin: 0, color: '#4b5563' }}>{file ? file.name : 'Drag and drop or click to select file'}</p>
+              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', padding: '12px', borderRadius: '50%', display: 'inline-flex', marginBottom: '16px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                <UploadCloud size={24} color="#6b7280" />
+              </div>
+              <p style={{ margin: '0 0 4px 0', color: '#111827', fontWeight: '500', fontSize: '0.9375rem' }}>{file ? file.name : 'Click to upload or drag and drop'}</p>
+              <p style={{ margin: 0, color: '#6b7280', fontSize: '0.8125rem' }}>PDF, PNG, or JPG (max. 10MB)</p>
             </div>
           </div>
 
           <button 
             type="submit" 
             disabled={status === 'uploading' || !file || !title}
-            style={{ backgroundColor: '#3b82f6', color: 'white', padding: '12px 24px', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: (status === 'uploading' || !file || !title) ? 'not-allowed' : 'pointer', width: '100%' }}
+            style={{ backgroundColor: '#111827', color: 'white', padding: '12px 24px', border: 'none', borderRadius: '8px', fontWeight: '500', fontSize: '0.9375rem', cursor: (status === 'uploading' || !file || !title) ? 'not-allowed' : 'pointer', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'background-color 0.2s ease' }}
           >
-            {status === 'uploading' ? 'Processing...' : 'Upload Document'}
+            {status === 'uploading' ? (
+              <><UploadCloud size={18} style={{ animation: 'spin 2s linear infinite' }} /> Processing & Extracting...</>
+            ) : 'Upload Document'}
           </button>
         </form>
 
@@ -91,31 +102,42 @@ export const UploadPage: React.FC = () => {
         )}
 
         {status === 'success' && (
-          <div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '6px', color: '#065f46' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontWeight: 'bold' }}>
+          <div style={{ marginTop: '24px', padding: '20px', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontWeight: '600', color: '#047857' }}>
               <CheckCircle size={20} /> {message}
             </div>
             {result && (
-              <div style={{ fontSize: '0.875rem', backgroundColor: 'white', padding: '12px', borderRadius: '4px', marginTop: '12px' }}>
-                <p style={{ margin: '0 0 4px 0' }}><strong>Extraction:</strong> {result.extraction_method}</p>
-                <p style={{ margin: '0 0 4px 0' }}><strong>Confidence:</strong> {result.ocr_confidence ? `${Math.round(result.ocr_confidence)}%` : 'N/A'}</p>
-                <p style={{ margin: '0 0 12px 0' }}><strong>Pages:</strong> {result.page_count}</p>
-                <a href={`/documents/${result.id}`} style={{ display: 'inline-block', backgroundColor: '#ecfdf5', color: '#065f46', textDecoration: 'none', padding: '6px 12px', borderRadius: '4px', border: '1px solid #a7f3d0', fontWeight: 'bold' }}>View Document</a>
+              <div style={{ fontSize: '0.875rem', backgroundColor: '#fafafa', padding: '16px', borderRadius: '8px', border: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>
+                  <span style={{ color: '#6b7280' }}>Extraction</span>
+                  <span style={{ fontWeight: '500', color: '#111827' }}>{result.extraction_method}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>
+                  <span style={{ color: '#6b7280' }}>Confidence</span>
+                  <span style={{ fontWeight: '500', color: '#111827' }}>{result.ocr_confidence ? `${Math.round(result.ocr_confidence)}%` : 'N/A'}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#6b7280' }}>Pages</span>
+                  <span style={{ fontWeight: '500', color: '#111827' }}>{result.page_count}</span>
+                </div>
+                <a href={`/documents/${result.id}`} style={{ marginTop: '12px', display: 'inline-flex', justifyContent: 'center', backgroundColor: '#ffffff', color: '#111827', textDecoration: 'none', padding: '8px 16px', borderRadius: '6px', border: '1px solid #d1d5db', fontWeight: '500', fontSize: '0.875rem', transition: 'background-color 0.15s ease' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}>
+                  View Document
+                </a>
               </div>
             )}
             {result?.duplicate_warning && result.duplicate_warning.length > 0 && (
-              <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '4px', color: '#b45309' }}>
-                <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <AlertCircle size={16} /> Possible Duplicate Detected!
+              <div style={{ marginTop: '16px', padding: '16px', backgroundColor: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '8px', color: '#b45309' }}>
+                <p style={{ margin: '0 0 4px 0', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <AlertCircle size={18} /> Possible Duplicate Detected
                 </p>
-                <p style={{ margin: 0, fontSize: '0.875rem' }}>This document appears similar to existing documents in the system. It has been flagged for moderator review.</p>
+                <p style={{ margin: 0, fontSize: '0.875rem', lineHeight: '1.5' }}>This document appears similar to existing documents in the system. It has been flagged for moderator review.</p>
               </div>
             )}
           </div>
         )}
 
         {status === 'error' && (
-          <div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#991b1b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '8px', color: '#b91c1c', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.9375rem', fontWeight: '500' }}>
             <AlertCircle size={20} /> {message}
           </div>
         )}

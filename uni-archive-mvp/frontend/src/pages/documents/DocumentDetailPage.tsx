@@ -43,48 +43,55 @@ export const DocumentDetailPage: React.FC = () => {
   if (!doc) return null;
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+    <div style={{ maxWidth: '800px', margin: '0 auto', paddingBottom: '40px' }}>
+      <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.025)', border: '1px solid #f3f4f6' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
           <div>
-            <h2 style={{ margin: '0 0 8px 0', fontSize: '1.5rem', color: '#111827' }}>{doc.title}</h2>
-            <div style={{ display: 'flex', gap: '16px', color: '#6b7280', fontSize: '0.875rem' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Calendar size={16} /> {new Date(doc.created_at).toLocaleDateString()}</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Shield size={16} /> {doc.is_approved ? 'Approved' : 'Pending'}</span>
+            <h2 style={{ margin: '0 0 12px 0', fontSize: '1.75rem', fontWeight: '700', color: '#111827', letterSpacing: '-0.025em', lineHeight: '1.2' }}>{doc.title}</h2>
+            <div style={{ display: 'flex', gap: '16px', color: '#6b7280', fontSize: '0.875rem', fontWeight: '500' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={16} strokeWidth={2} /> {new Date(doc.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: doc.is_approved ? '#059669' : '#d97706', backgroundColor: doc.is_approved ? '#ecfdf5' : '#fffbeb', padding: '2px 8px', borderRadius: '12px' }}>
+                <Shield size={16} strokeWidth={2} /> {doc.is_approved ? 'Verified' : 'Pending Review'}
+              </span>
             </div>
           </div>
           <button 
             onClick={handleDownload}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#3b82f6', color: 'white', padding: '10px 16px', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#2563eb', color: 'white', padding: '10px 20px', border: '1px solid transparent', borderRadius: '8px', fontWeight: '600', fontSize: '0.9375rem', cursor: 'pointer', boxShadow: '0 1px 2px rgba(37,99,235,0.2)', transition: 'background-color 0.15s ease', flexShrink: 0 }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
           >
-            <Download size={18} /> Download Original
+            <Download size={18} strokeWidth={2} /> Download Original
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '32px', padding: '16px', backgroundColor: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '40px', padding: '20px', backgroundColor: '#fafafa', borderRadius: '12px', border: '1px solid #f3f4f6' }}>
           <div>
-            <p style={{ margin: '0 0 4px 0', fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', fontWeight: 'bold' }}>Filename</p>
-            <p style={{ margin: 0, color: '#111827' }}>{doc.original_filename}</p>
+            <p style={{ margin: '0 0 6px 0', fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>Filename</p>
+            <p style={{ margin: 0, color: '#111827', fontWeight: '500', fontSize: '0.9375rem', wordBreak: 'break-all' }}>{doc.original_filename}</p>
           </div>
           <div>
-            <p style={{ margin: '0 0 4px 0', fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', fontWeight: 'bold' }}>File Size</p>
-            <p style={{ margin: 0, color: '#111827' }}>{doc.file_size ? `${(doc.file_size / 1024 / 1024).toFixed(2)} MB` : 'Unknown'}</p>
+            <p style={{ margin: '0 0 6px 0', fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>File Size</p>
+            <p style={{ margin: 0, color: '#111827', fontWeight: '500', fontSize: '0.9375rem' }}>{doc.file_size ? `${(doc.file_size / 1024 / 1024).toFixed(2)} MB` : 'Unknown'}</p>
           </div>
           <div>
-            <p style={{ margin: '0 0 4px 0', fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', fontWeight: 'bold' }}>Extraction Method</p>
-            <p style={{ margin: 0, color: '#111827' }}>{doc.extraction_method || 'N/A'}</p>
+            <p style={{ margin: '0 0 6px 0', fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>Extraction</p>
+            <p style={{ margin: 0, color: '#111827', fontWeight: '500', fontSize: '0.9375rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: doc.extraction_method === 'Digital' ? '#10b981' : '#3b82f6' }}></span>
+              {doc.extraction_method || 'N/A'}
+            </p>
           </div>
           <div>
-            <p style={{ margin: '0 0 4px 0', fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', fontWeight: 'bold' }}>OCR Confidence</p>
-            <p style={{ margin: 0, color: '#111827' }}>{doc.ocr_confidence ? `${Math.round(doc.ocr_confidence)}%` : 'N/A'}</p>
+            <p style={{ margin: '0 0 6px 0', fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>OCR Confidence</p>
+            <p style={{ margin: 0, color: '#111827', fontWeight: '500', fontSize: '0.9375rem' }}>{doc.ocr_confidence ? `${Math.round(doc.ocr_confidence)}%` : 'N/A'}</p>
           </div>
         </div>
 
         <div>
-          <h3 style={{ fontSize: '1.125rem', color: '#111827', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FileText size={20} /> Extracted Text Preview
+          <h3 style={{ fontSize: '1.125rem', color: '#111827', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600', letterSpacing: '-0.01em' }}>
+            <FileText size={20} strokeWidth={2} /> OCR Text Preview
           </h3>
-          <div style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '6px', border: '1px solid #e5e7eb', maxHeight: '400px', overflowY: 'auto', whiteSpace: 'pre-wrap', fontSize: '0.875rem', color: '#374151', fontFamily: 'monospace' }}>
+          <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '8px', border: '1px solid #e5e7eb', maxHeight: '500px', overflowY: 'auto', whiteSpace: 'pre-wrap', fontSize: '0.875rem', color: '#374151', fontFamily: '"JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace', lineHeight: '1.6', boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)' }}>
             {doc.ocr_text || 'No text extracted.'}
           </div>
         </div>

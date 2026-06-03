@@ -1,9 +1,25 @@
 import React, { useState } from 'react';
 import { apiClient } from '../../api/client';
-import { Search, BrainCircuit, ListFilter, FileText } from 'lucide-react';
+import { Search, BrainCircuit, ListFilter, FileText, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 type SearchMode = 'keyword' | 'semantic' | 'hybrid';
+
+const Highlight: React.FC<{ text: string, query: string }> = ({ text, query }) => {
+  if (!query.trim()) return <>{text}</>;
+  const parts = text.split(new RegExp(`(${query})`, 'gi'));
+  return (
+    <>
+      {parts.map((part, i) => 
+        part.toLowerCase() === query.toLowerCase() ? (
+          <span key={i} style={{ backgroundColor: '#fef08a', color: '#854d0e', fontWeight: '500', borderRadius: '2px', padding: '0 2px' }}>{part}</span>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
+};
 
 export const SearchPage: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -47,53 +63,65 @@ export const SearchPage: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '900px', margin: '0 auto' }}>
       {/* Search Header */}
-      <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', marginBottom: '24px' }}>
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '16px' }}>
-          <div style={{ flex: 1, position: 'relative' }}>
-            <Search size={20} color="#9ca3af" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
+      <div style={{ marginBottom: '32px' }}>
+        <form onSubmit={handleSearch} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)', border: '1px solid #e5e7eb', overflow: 'hidden', transition: 'all 0.2s ease' }}
+               onFocus={(e) => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(37,99,235,0.1), 0 2px 4px -1px rgba(37,99,235,0.06)'; }}
+               onBlur={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)'; }}
+          >
+            <div style={{ padding: '0 20px', color: '#9ca3af', display: 'flex', alignItems: 'center' }}>
+              <Search size={22} strokeWidth={2} />
+            </div>
             <input 
               type="text" 
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search for concepts, courses, or specific keywords..."
-              style={{ width: '100%', padding: '16px 16px 16px 48px', fontSize: '1.125rem', border: '1px solid #d1d5db', borderRadius: '8px', boxSizing: 'border-box' }}
+              placeholder="Search concepts, courses, or topics..."
+              style={{ flex: 1, padding: '20px 0', fontSize: '1.125rem', border: 'none', outline: 'none', backgroundColor: 'transparent', color: '#111827', fontFamily: 'inherit' }}
             />
+            <button 
+              type="submit" 
+              disabled={loading || !query.trim()}
+              style={{ backgroundColor: (loading || !query.trim()) ? '#f3f4f6' : '#2563eb', color: (loading || !query.trim()) ? '#9ca3af' : 'white', padding: '12px 24px', margin: '8px', fontSize: '0.9375rem', fontWeight: '600', border: 'none', borderRadius: '8px', cursor: (loading || !query.trim()) ? 'not-allowed' : 'pointer', transition: 'all 0.2s ease' }}
+            >
+              {loading ? 'Searching...' : 'Search'}
+            </button>
           </div>
-          <button 
-            type="submit" 
-            disabled={loading || !query.trim()}
-            style={{ backgroundColor: '#111827', color: 'white', padding: '0 32px', fontSize: '1rem', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: (loading || !query.trim()) ? 'not-allowed' : 'pointer' }}
-          >
-            {loading ? 'Searching...' : 'Search'}
-          </button>
-        </form>
 
-        {/* Search Modes */}
-        <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
-          <button 
-            type="button"
-            onClick={() => setMode('keyword')}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '20px', border: mode === 'keyword' ? '2px solid #3b82f6' : '1px solid #d1d5db', backgroundColor: mode === 'keyword' ? '#eff6ff' : 'white', color: mode === 'keyword' ? '#1d4ed8' : '#4b5563', cursor: 'pointer', fontWeight: '500' }}
-          >
-            <ListFilter size={18} /> Keyword (Exact)
-          </button>
-          <button 
-            type="button"
-            onClick={() => setMode('semantic')}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '20px', border: mode === 'semantic' ? '2px solid #8b5cf6' : '1px solid #d1d5db', backgroundColor: mode === 'semantic' ? '#f5f3ff' : 'white', color: mode === 'semantic' ? '#6d28d9' : '#4b5563', cursor: 'pointer', fontWeight: '500' }}
-          >
-            <BrainCircuit size={18} /> Semantic (Contextual)
-          </button>
-          <button 
-            type="button"
-            onClick={() => setMode('hybrid')}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '20px', border: mode === 'hybrid' ? '2px solid #10b981' : '1px solid #d1d5db', backgroundColor: mode === 'hybrid' ? '#ecfdf5' : 'white', color: mode === 'hybrid' ? '#047857' : '#4b5563', cursor: 'pointer', fontWeight: '500' }}
-          >
-            <Search size={18} /> Hybrid (Fusion)
-          </button>
-        </div>
+          {/* Search Modes */}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginRight: '8px' }}>Engine:</span>
+            <button 
+              type="button"
+              onClick={() => setMode('keyword')}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '20px', border: mode === 'keyword' ? '1px solid #bfdbfe' : '1px solid transparent', backgroundColor: mode === 'keyword' ? '#eff6ff' : 'transparent', color: mode === 'keyword' ? '#1d4ed8' : '#6b7280', cursor: 'pointer', fontWeight: '500', fontSize: '0.875rem', transition: 'all 0.15s ease' }}
+              onMouseOver={(e) => { if(mode !== 'keyword') e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
+              onMouseOut={(e) => { if(mode !== 'keyword') e.currentTarget.style.backgroundColor = 'transparent'; }}
+            >
+              <ListFilter size={16} strokeWidth={2} /> Keyword
+            </button>
+            <button 
+              type="button"
+              onClick={() => setMode('semantic')}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '20px', border: mode === 'semantic' ? '1px solid #ddd6fe' : '1px solid transparent', backgroundColor: mode === 'semantic' ? '#f5f3ff' : 'transparent', color: mode === 'semantic' ? '#6d28d9' : '#6b7280', cursor: 'pointer', fontWeight: '500', fontSize: '0.875rem', transition: 'all 0.15s ease' }}
+              onMouseOver={(e) => { if(mode !== 'semantic') e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
+              onMouseOut={(e) => { if(mode !== 'semantic') e.currentTarget.style.backgroundColor = 'transparent'; }}
+            >
+              <BrainCircuit size={16} strokeWidth={2} /> Semantic
+            </button>
+            <button 
+              type="button"
+              onClick={() => setMode('hybrid')}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '20px', border: mode === 'hybrid' ? '1px solid #a7f3d0' : '1px solid transparent', backgroundColor: mode === 'hybrid' ? '#ecfdf5' : 'transparent', color: mode === 'hybrid' ? '#047857' : '#6b7280', cursor: 'pointer', fontWeight: '500', fontSize: '0.875rem', transition: 'all 0.15s ease' }}
+              onMouseOver={(e) => { if(mode !== 'hybrid') e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
+              onMouseOut={(e) => { if(mode !== 'hybrid') e.currentTarget.style.backgroundColor = 'transparent'; }}
+            >
+              <Search size={16} strokeWidth={2} /> Hybrid Fusion
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Results Section */}
@@ -105,55 +133,74 @@ export const SearchPage: React.FC = () => {
 
       {!loading && !error && results.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '8px' }}>
+          <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '8px', fontWeight: '500' }}>
             Found {results.length} results
           </div>
           {results.map((item, idx) => (
-            <div key={idx} style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+            <div key={idx} style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', border: '1px solid #f3f4f6', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', transition: 'transform 0.15s ease, box-shadow 0.15s ease' }}
+                 onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.05)'; }}
+                 onMouseOut={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)'; }}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
                 <div>
-                  <Link to={`/documents/${item.id || item.document_id}`} style={{ textDecoration: 'none', color: '#1d4ed8', fontSize: '1.25rem', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>
-                    {item.title}
+                  <Link to={`/documents/${item.id || item.document_id}`} style={{ textDecoration: 'none', color: '#111827', fontSize: '1.25rem', fontWeight: '600', letterSpacing: '-0.01em', display: 'block', marginBottom: '6px' }} onMouseOver={(e) => e.currentTarget.style.color = '#2563eb'} onMouseOut={(e) => e.currentTarget.style.color = '#111827'}>
+                    <Highlight text={item.title} query={query} />
                   </Link>
-                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-                    {item.course ? `Course: ${item.course}` : 'Unknown Course'} | {item.document_type || 'Document'} | {new Date(item.created_at || Date.now()).getFullYear()}
-                  </span>
+                  <div style={{ fontSize: '0.8125rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ backgroundColor: '#f3f4f6', padding: '2px 8px', borderRadius: '12px', fontWeight: '500', color: '#4b5563' }}>{item.course || 'General'}</span>
+                    <span>•</span>
+                    <span>{item.document_type || 'Document'}</span>
+                    <span>•</span>
+                    <span>{new Date(item.created_at || Date.now()).getFullYear()}</span>
+                  </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ backgroundColor: mode === 'semantic' ? '#f5f3ff' : mode === 'hybrid' ? '#ecfdf5' : '#eff6ff', color: mode === 'semantic' ? '#6d28d9' : mode === 'hybrid' ? '#047857' : '#1d4ed8', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                  <span style={{ backgroundColor: mode === 'semantic' ? '#f5f3ff' : mode === 'hybrid' ? '#ecfdf5' : '#eff6ff', color: mode === 'semantic' ? '#6d28d9' : mode === 'hybrid' ? '#047857' : '#1d4ed8', padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', letterSpacing: '0.025em' }}>
                     Score: {item.score || item.relevance_score ? Math.round((item.score || item.relevance_score) * 100) / 100 : 'N/A'}
                   </span>
                 </div>
               </div>
               
-              <div style={{ fontSize: '0.875rem', color: '#4b5563', marginBottom: '16px', lineHeight: '1.5', fontStyle: 'italic', borderLeft: '3px solid #d1d5db', paddingLeft: '12px' }}>
-                "{item.matching_chunk || item.snippet || 'No snippet available.'}"
+              <div style={{ fontSize: '0.9375rem', color: '#4b5563', marginBottom: '20px', lineHeight: '1.6', fontStyle: 'italic', borderLeft: '3px solid #e5e7eb', paddingLeft: '16px', backgroundColor: '#fafafa', padding: '12px 16px', borderRadius: '0 8px 8px 0' }}>
+                "<Highlight text={item.matching_chunk || item.snippet || 'No snippet available.'} query={query} />"
               </div>
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', gap: '16px', fontSize: '0.75rem', color: '#9ca3af' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FileText size={14} /> Extraction: {item.extraction_method || 'Unknown'}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f3f4f6', paddingTop: '16px' }}>
+                <div style={{ display: 'flex', gap: '16px', fontSize: '0.8125rem', color: '#9ca3af' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><FileText size={14} /> Extraction: {item.extraction_method || 'Unknown'}</span>
                 </div>
-                <button 
-                  onClick={async () => {
-                    try {
-                      const id = item.id || item.document_id;
-                      const response = await apiClient.get(`/api/documents/${id}/download`, { responseType: 'blob' });
-                      const url = window.URL.createObjectURL(new Blob([response.data]));
-                      const link = document.createElement('a');
-                      link.href = url;
-                      link.setAttribute('download', item.title + '.pdf');
-                      document.body.appendChild(link);
-                      link.click();
-                      link.remove();
-                    } catch (err) {
-                      alert('Download failed.');
-                    }
-                  }}
-                  style={{ backgroundColor: 'transparent', color: '#3b82f6', border: '1px solid #3b82f6', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 'bold' }}
-                >
-                  Download
-                </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <Link 
+                    to={`/documents/${item.id || item.document_id}`}
+                    style={{ backgroundColor: '#f3f4f6', color: '#374151', textDecoration: 'none', padding: '6px 16px', borderRadius: '6px', fontSize: '0.8125rem', fontWeight: '600', transition: 'background-color 0.15s ease' }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e5e7eb'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                  >
+                    View Details
+                  </Link>
+                  <button 
+                    onClick={async () => {
+                      try {
+                        const id = item.id || item.document_id;
+                        const response = await apiClient.get(`/api/documents/${id}/download`, { responseType: 'blob' });
+                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', item.title + '.pdf');
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                      } catch (err) {
+                        alert('Download failed.');
+                      }
+                    }}
+                    style={{ backgroundColor: 'transparent', color: '#2563eb', border: '1px solid #2563eb', padding: '6px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8125rem', fontWeight: '600', transition: 'all 0.15s ease', display: 'flex', alignItems: 'center', gap: '6px' }}
+                    onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#eff6ff'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                  >
+                    <Download size={14} strokeWidth={2} /> Download
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -161,8 +208,10 @@ export const SearchPage: React.FC = () => {
       )}
 
       {!loading && !error && results.length === 0 && query && (
-        <div style={{ textAlign: 'center', padding: '48px', backgroundColor: 'white', borderRadius: '8px', color: '#6b7280' }}>
-          No documents found matching your query.
+        <div style={{ textAlign: 'center', padding: '64px', backgroundColor: '#ffffff', border: '1px dashed #d1d5db', borderRadius: '12px', color: '#6b7280' }}>
+          <Search size={40} color="#d1d5db" style={{ marginBottom: '16px' }} />
+          <p style={{ margin: 0, fontSize: '1rem', fontWeight: '500' }}>No documents found matching "{query}"</p>
+          <p style={{ margin: '8px 0 0 0', fontSize: '0.875rem' }}>Try adjusting your keywords or switching search engines.</p>
         </div>
       )}
     </div>

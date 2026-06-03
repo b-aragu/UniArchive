@@ -28,64 +28,77 @@ export const AppShell: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f9fafb', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#fcfcfc', fontFamily: 'system-ui, -apple-system, sans-serif', color: '#111827' }}>
       {/* Sidebar */}
-      <aside style={{ width: '250px', backgroundColor: '#1f2937', color: 'white', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid #374151' }}>
-          <BookOpen color="#60a5fa" />
-          <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 'bold' }}>UniArchive</h1>
+      <aside style={{ width: '260px', backgroundColor: '#ffffff', borderRight: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '24px 20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ backgroundColor: '#2563eb', padding: '6px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <BookOpen color="#ffffff" size={20} />
+          </div>
+          <h1 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '700', letterSpacing: '-0.025em', color: '#111827' }}>UniArchive</h1>
         </div>
         
-        <nav style={{ flex: 1, padding: '20px 0' }}>
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            {navItems.map((item) => (
-              <li key={item.path}>
-                <Link
-                  to={item.path}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '12px 20px',
-                    color: location.pathname.startsWith(item.path) ? '#60a5fa' : '#d1d5db',
-                    textDecoration: 'none',
-                    backgroundColor: location.pathname.startsWith(item.path) ? '#374151' : 'transparent',
-                  }}
-                >
-                  {item.icon}
-                  {item.name}
-                </Link>
-              </li>
-            ))}
+        <nav style={{ flex: 1, padding: '12px 12px' }}>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {navItems.map((item) => {
+              const isActive = location.pathname.startsWith(item.path);
+              return (
+                <li key={item.path}>
+                  <Link
+                    to={item.path}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      color: isActive ? '#111827' : '#6b7280',
+                      textDecoration: 'none',
+                      backgroundColor: isActive ? '#f3f4f6' : 'transparent',
+                      fontWeight: isActive ? '500' : '400',
+                      fontSize: '0.9375rem',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <span style={{ color: isActive ? '#2563eb' : '#9ca3af', display: 'flex' }}>
+                      {React.cloneElement(item.icon as React.ReactElement, { size: 18, strokeWidth: isActive ? 2 : 1.5 } as any)}
+                    </span>
+                    {item.name}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
-        <div style={{ padding: '20px', borderTop: '1px solid #374151' }}>
-          <div style={{ fontSize: '0.875rem', color: '#9ca3af', marginBottom: '10px' }}>
-            {user?.email} <br />
-            <span style={{ textTransform: 'capitalize', color: '#60a5fa' }}>{user?.role}</span>
+        <div style={{ padding: '16px 20px', borderTop: '1px solid #f3f4f6', backgroundColor: '#fafafa' }}>
+          <div style={{ fontSize: '0.8125rem', color: '#6b7280', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span style={{ fontWeight: '500', color: '#374151', textOverflow: 'ellipsis', overflow: 'hidden' }}>{user?.email}</span>
+            <span style={{ textTransform: 'uppercase', fontSize: '0.6875rem', letterSpacing: '0.05em', color: '#9ca3af' }}>{user?.role}</span>
           </div>
           <button 
             onClick={handleLogout}
             style={{ 
               display: 'flex', alignItems: 'center', gap: '8px', 
-              background: 'none', border: 'none', color: '#f87171', 
-              cursor: 'pointer', padding: 0, fontSize: '1rem' 
+              background: 'white', border: '1px solid #e5e7eb', color: '#374151', 
+              cursor: 'pointer', padding: '6px 12px', fontSize: '0.8125rem', borderRadius: '6px', fontWeight: '500', width: '100%', justifyContent: 'center', transition: 'background 0.15s ease' 
             }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
           >
-            <LogOut size={18} /> Logout
+            <LogOut size={16} strokeWidth={1.5} /> Sign Out
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <header style={{ height: '60px', backgroundColor: 'white', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', padding: '0 24px' }}>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#111827', textTransform: 'capitalize' }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <header style={{ height: '64px', backgroundColor: 'transparent', display: 'flex', alignItems: 'center', padding: '0 32px' }}>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#111827', fontWeight: '600', textTransform: 'capitalize', letterSpacing: '-0.025em' }}>
             {location.pathname.replace('/', '') || 'Dashboard'}
           </h2>
         </header>
-        <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+        <div style={{ flex: 1, padding: '0 32px 32px 32px', overflowY: 'auto' }}>
           <Outlet />
         </div>
       </main>
