@@ -253,3 +253,14 @@ This log is an ongoing record of architectural changes, file additions, refactor
   * `[MODIFY]` `docs/project-progress/20_Final_UI_Functionality_Polish_Report.md`
   * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
 * **Outcome:** The upload process now gives immediate, highly-detailed feedback without requiring the user to navigate away. The application successfully passes all build tests.
+
+---
+
+### [2026-06-03] — Upload Bug Fix & UX Stabilization
+* **Phase:** Phase 11: Final Polish
+* **Action:** Rewrote the upload page to stabilize the UX and fix bugs. Implemented automatic document title generation from filename, added detailed progress tracking stages with simulated steps, refined the success panel, ensured the OCR preview falls back to "Text preview will be available on the document detail page", and improved error states with suggested fixes.
+* **Files Affected:**
+  * `[MODIFY]` `frontend/src/pages/documents/UploadPage.tsx`
+  * `[MODIFY]` `docs/project-progress/20_Final_UI_Functionality_Polish_Report.md`
+  * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
+* **Outcome:** The upload process is now robust, visually clear, and provides excellent feedback to the user throughout the entire lifecycle of the document upload.

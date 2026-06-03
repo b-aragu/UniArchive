@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../../api/client';
-import { UploadCloud, CheckCircle, AlertCircle, Clock, FileText, File, Download } from 'lucide-react';
+import { UploadCloud, CheckCircle, AlertCircle, Clock, FileText, Download, Check, Circle, Loader } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const UploadPage: React.FC = () => {
@@ -9,6 +9,7 @@ export const UploadPage: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [result, setResult] = useState<any>(null);
+  const [progressStage, setProgressStage] = useState(0);
   
   const [recentDocuments, setRecentDocuments] = useState<any[]>([]);
   const [recentLoading, setRecentLoading] = useState(true);
@@ -30,7 +31,19 @@ export const UploadPage: React.FC = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      setFile(selectedFile);
+      
+      // Auto-generate title
+      let name = selectedFile.name;
+      const lastDot = name.lastIndexOf('.');
+      if (lastDot !== -1) {
+        name = name.substring(0, lastDot);
+      }
+      name = name.replace(/[-_]/g, ' ');
+      // Title case
+      name = name.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+      setTitle(name);
     }
   };
 
@@ -39,8 +52,14 @@ export const UploadPage: React.FC = () => {
     if (!file || !title) return;
 
     setStatus('uploading');
-    setMessage('Uploading and extracting text...');
+    setMessage('Uploading file, extracting text, indexing document. This may take a few seconds.');
+    setProgressStage(0);
     const startTime = performance.now();
+
+    // Simulate progress stages
+    const stageInterval = setInterval(() => {
+      setProgressStage(prev => (prev < 3 ? prev + 1 : prev));
+    }, 1200);
 
     const formData = new FormData();
     formData.append('file', file);
@@ -52,8 +71,10 @@ export const UploadPage: React.FC = () => {
       });
       const endTime = performance.now();
       
+      clearInterval(stageInterval);
+      setProgressStage(4); // All complete
       setStatus('success');
-      setMessage('Upload Complete!');
+      setMessage('Upload Complete');
       setResult({
         ...response.data,
         original_filename: file.name,
@@ -63,8 +84,9 @@ export const UploadPage: React.FC = () => {
       setTitle('');
       fetchRecentDocuments();
     } catch (err: any) {
+      clearInterval(stageInterval);
       setStatus('error');
-      setMessage(err.response?.data?.detail || 'Upload failed. Please try again.');
+      setMessage(err.response?.data?.detail || 'An unexpected error occurred during upload.');
     }
   };
 
@@ -82,6 +104,14 @@ export const UploadPage: React.FC = () => {
       alert('Failed to download document.');
     }
   };
+
+  const stages = [
+    'Uploading file',
+    'Extracting OCR text',
+    'Checking duplicates',
+    'Generating search index',
+    'Saving document'
+  ];
 
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr', gap: '32px' }}>
@@ -135,21 +165,55 @@ export const UploadPage: React.FC = () => {
             style={{ backgroundColor: '#111827', color: 'white', padding: '12px 24px', border: 'none', borderRadius: '8px', fontWeight: '500', fontSize: '0.9375rem', cursor: (status === 'uploading' || !file || !title) ? 'not-allowed' : 'pointer', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'background-color 0.2s ease', opacity: (status === 'uploading' || !file || !title) ? 0.7 : 1 }}
           >
             {status === 'uploading' ? (
-              <><UploadCloud size={18} style={{ animation: 'spin 2s linear infinite' }} /> Processing...</>
+              <><Loader size={18} style={{ animation: 'spin 2s linear infinite' }} /> Uploading and processing...</>
             ) : 'Upload Document'}
           </button>
         </form>
 
         {status === 'uploading' && (
-          <div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center', gap: '12px', color: '#1d4ed8' }}>
-            <div style={{ animation: 'spin 1s linear infinite' }}><UploadCloud size={20} /></div>
-            <span style={{ fontWeight: '500', fontSize: '0.9375rem' }}>{message}</span>
+          <div style={{ marginTop: '32px', backgroundColor: '#fafafa', borderRadius: '8px', border: '1px solid #f3f4f6', padding: '24px' }}>
+            <p style={{ margin: '0 0 20px 0', color: '#4b5563', fontSize: '0.9375rem', fontWeight: '500' }}>{message}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {stages.map((stage, index) => {
+                const isComplete = index < progressStage;
+                const isActive = index === progressStage;
+                const isPending = index > progressStage;
+                
+                return (
+                  <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {isComplete ? (
+                      <CheckCircle size={18} color="#059669" />
+                    ) : isActive ? (
+                      <Loader size={18} color="#2563eb" style={{ animation: 'spin 2s linear infinite' }} />
+                    ) : (
+                      <Circle size={18} color="#d1d5db" />
+                    )}
+                    <span style={{ 
+                      fontSize: '0.9375rem',
+                      color: isComplete ? '#111827' : isActive ? '#2563eb' : '#9ca3af',
+                      fontWeight: isActive || isComplete ? '500' : '400'
+                    }}>
+                      {stage} {isActive && <span style={{ color: '#6b7280', fontSize: '0.8125rem', marginLeft: '8px', fontWeight: '400' }}>In Progress</span>}
+                      {isComplete && <span style={{ color: '#059669', fontSize: '0.8125rem', marginLeft: '8px', fontWeight: '400' }}>Complete</span>}
+                      {isPending && <span style={{ color: '#9ca3af', fontSize: '0.8125rem', marginLeft: '8px', fontWeight: '400' }}>Pending</span>}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
         {status === 'error' && (
-          <div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '8px', color: '#b91c1c', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.9375rem', fontWeight: '500' }}>
-            <AlertCircle size={20} /> {message}
+          <div style={{ marginTop: '24px', padding: '24px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px', color: '#b91c1c' }}>
+              <AlertCircle size={24} strokeWidth={2} />
+              <h4 style={{ margin: 0, fontSize: '1.125rem', fontWeight: '600' }}>Upload Failed</h4>
+            </div>
+            <p style={{ margin: '0 0 12px 0', fontSize: '0.9375rem', color: '#7f1d1d' }}>{message}</p>
+            <div style={{ backgroundColor: '#ffffff', padding: '12px', borderRadius: '6px', border: '1px solid #fee2e2', fontSize: '0.875rem', color: '#991b1b' }}>
+              <strong>Suggested Fix:</strong> Check required metadata, login session, and ensure your file is a valid PDF, PNG, or JPG under 10MB.
+            </div>
           </div>
         )}
       </div>
@@ -197,7 +261,7 @@ export const UploadPage: React.FC = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '24px', borderTop: '1px solid #f3f4f6', paddingTop: '24px' }}>
               <div>
                 <p style={{ margin: '0 0 4px 0', fontSize: '0.75rem', color: '#6b7280' }}>Extraction</p>
-                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#111827', fontWeight: '500' }}>{result.extraction_method}</p>
+                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#111827', fontWeight: '500' }}>{result.extraction_method || 'System Default'}</p>
               </div>
               <div>
                 <p style={{ margin: '0 0 4px 0', fontSize: '0.75rem', color: '#6b7280' }}>Confidence</p>
@@ -205,7 +269,7 @@ export const UploadPage: React.FC = () => {
               </div>
               <div>
                 <p style={{ margin: '0 0 4px 0', fontSize: '0.75rem', color: '#6b7280' }}>Pages</p>
-                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#111827', fontWeight: '500' }}>{result.page_count}</p>
+                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#111827', fontWeight: '500' }}>{result.page_count || 1}</p>
               </div>
             </div>
 
@@ -232,24 +296,22 @@ export const UploadPage: React.FC = () => {
           {/* Recently Uploaded Document Preview */}
           <div style={{ backgroundColor: '#ffffff', padding: '32px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.025)', border: '1px solid #f3f4f6' }}>
             <h3 style={{ margin: '0 0 16px 0', fontSize: '1.125rem', fontWeight: '600', color: '#111827', letterSpacing: '-0.025em', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FileText size={20} color="#2563eb" /> Recently Uploaded Document
+              <FileText size={20} color="#2563eb" /> Extracted Text Preview
             </h3>
             {result.ocr_text ? (
               <div style={{ backgroundColor: '#fafafa', padding: '20px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#374151', fontFamily: '"JetBrains Mono", monospace', whiteSpace: 'pre-wrap', lineHeight: '1.6', position: 'relative' }}>
-                {result.ocr_text.substring(0, 400)}
-                {result.ocr_text.length > 400 && <span style={{ color: '#9ca3af' }}>...</span>}
+                {result.ocr_text.substring(0, 500)}
+                {result.ocr_text.length > 500 && <span style={{ color: '#9ca3af' }}>...</span>}
                 <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(transparent, #fafafa)', borderRadius: '0 0 8px 8px' }}></div>
               </div>
             ) : (
               <div style={{ backgroundColor: '#fafafa', padding: '32px', borderRadius: '8px', border: '1px solid #e5e7eb', textAlign: 'center', color: '#6b7280', fontSize: '0.9375rem' }}>
-                Text preview is available on the document detail page.
+                Text preview will be available on the document detail page.
               </div>
             )}
           </div>
         </div>
       )}
-
-      {/* Empty State before upload for Preview Section if needed - skipping as design looks better just showing the block on success */}
 
       {/* Recent Uploads Section */}
       <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.025)', border: '1px solid #f3f4f6', overflow: 'hidden' }}>
@@ -263,12 +325,17 @@ export const UploadPage: React.FC = () => {
              <div style={{ padding: '48px', color: '#9ca3af', textAlign: 'center', fontSize: '0.9375rem' }}>No documents in the archive yet.</div>
           ) : (
              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-               {recentDocuments.map((doc) => (
-                 <li key={doc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid #f3f4f6', transition: 'background-color 0.15s ease' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#fafafa'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+               {recentDocuments.map((doc) => {
+                 const isNewlyUploaded = result && result.id === doc.id;
+                 return (
+                 <li key={doc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid #f3f4f6', transition: 'background-color 0.15s ease', backgroundColor: isNewlyUploaded ? '#f0fdf4' : 'transparent' }} onMouseOver={(e) => { if (!isNewlyUploaded) e.currentTarget.style.backgroundColor = '#fafafa' }} onMouseOut={(e) => { if (!isNewlyUploaded) e.currentTarget.style.backgroundColor = 'transparent' }}>
                    <div>
-                     <p style={{ margin: '0 0 4px 0', fontWeight: '500', color: '#111827', fontSize: '0.9375rem' }}>{doc.title}</p>
+                     <p style={{ margin: '0 0 4px 0', fontWeight: '500', color: '#111827', fontSize: '0.9375rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                       {doc.title}
+                       {isNewlyUploaded && <span style={{ backgroundColor: '#10b981', color: 'white', fontSize: '0.625rem', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase', fontWeight: 'bold' }}>New</span>}
+                     </p>
                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8125rem', color: '#6b7280' }}>
-                       <span style={{ backgroundColor: '#f3f4f6', padding: '2px 8px', borderRadius: '12px', fontWeight: '500', color: '#4b5563' }}>{doc.document_type || 'Document'}</span>
+                       <span style={{ backgroundColor: isNewlyUploaded ? '#ffffff' : '#f3f4f6', padding: '2px 8px', borderRadius: '12px', fontWeight: '500', color: '#4b5563', border: isNewlyUploaded ? '1px solid #d1fae5' : 'none' }}>{doc.document_type || 'Document'}</span>
                        {doc.course && <span>• {doc.course} {doc.year ? `(${doc.year})` : ''}</span>}
                        <span>•</span>
                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: doc.is_approved ? '#059669' : '#d97706' }}>
@@ -285,7 +352,7 @@ export const UploadPage: React.FC = () => {
                      View
                    </Link>
                  </li>
-               ))}
+               )})}
              </ul>
           )}
         </div>

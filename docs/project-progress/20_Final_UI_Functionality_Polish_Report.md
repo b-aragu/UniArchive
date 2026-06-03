@@ -14,7 +14,7 @@ Perform a final audit and stabilization pass of the UniArchive MVP, ensuring the
 
 2. **Upload Duplicate Warning Not Displaying & Upload Experience Polish**
    - **Issue:** The upload component successfully triggered the duplicate detection pipeline on the backend, but the frontend did not display the returned `duplicate_warning` payload. Furthermore, the post-upload state lacked context, leaving users unsure of their uploaded document's details.
-   - **Fix:** Redesigned the entire `UploadPage.tsx` success state. Implemented an "Upload Complete" panel displaying the document's original filename, extraction method, OCR confidence, page count, and processing time. Added a "Recently Uploaded Document" section that provides a 400-character snippet of the extracted OCR text to instantly prove functionality. Also added a "Recent Uploads" table to quickly verify the state of the archive right from the upload screen. Loading states and drag-and-drop visuals were reinforced.
+   - **Fix:** Redesigned the entire `UploadPage.tsx` success state. Implemented an "Upload Complete" panel displaying the document's original filename, extraction method, OCR confidence, page count, and processing time. Added a "Recently Uploaded Document" section that provides a 500-character snippet of the extracted OCR text to instantly prove functionality. Added automatic document title generation from the filename. Implemented explicit uploading progress stages (simulated visually to match backend latency) and a "New" badge for recent uploads. Enhanced error states with actionable user feedback.
 
 3. **Hybrid Search Disabled**
    - **Issue:** The "Hybrid Search" toggle button was hardcoded to a disabled state marked as "Coming in Phase 8". 
