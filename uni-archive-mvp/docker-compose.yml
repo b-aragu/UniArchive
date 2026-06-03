@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16
+    container_name: uni_archive_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: uniarchive
+      POSTGRES_PASSWORD: uniarchive
+      POSTGRES_DB: uniarchive
+    ports:
+      - "5432:5432"
+    volumes:
+      - uni_archive_pgdata:/var/lib/postgresql/data
+
+volumes:
+  uni_archive_pgdata:
