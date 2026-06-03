@@ -28,13 +28,81 @@ The use case diagram illustrates three actor categories interacting with UNI ARC
 - Manage academic hierarchy (Faculties, Departments, Courses)
 - Generate evaluation reports
 
-*[Insert UML Use Case Diagram Here]*
+```mermaid
+usecaseDiagram
+    actor Student
+    actor Moderator
+    actor Administrator
 
-*[Insert Context Diagram Here]*
-*(A diagram showing the Student, Moderator, and Administrator interacting with the UniArchive System, which in turn interacts with the Database and OCR Engine)*
+    Student <|-- Moderator
+    Moderator <|-- Administrator
 
-*[Insert DFD Here]*
-*(Data Flow Diagrams detailing the flow of documents from upload, through processing, to search retrieval)*
+    package "UniArchive System" {
+        usecase "Upload Documents" as UC1
+        usecase "Search Resources" as UC2
+        usecase "Apply Filters" as UC3
+        usecase "Download Documents" as UC4
+        usecase "Provide Feedback" as UC5
+        
+        usecase "Review OCR Queue" as UC6
+        usecase "Verify Metadata" as UC7
+        usecase "Manage Duplicates" as UC8
+        
+        usecase "Manage Users" as UC9
+        usecase "Configure System" as UC10
+        usecase "Monitor Metrics" as UC11
+    }
+
+    Student --> UC1
+    Student --> UC2
+    Student --> UC3
+    Student --> UC4
+    Student --> UC5
+    
+    Moderator --> UC6
+    Moderator --> UC7
+    Moderator --> UC8
+    
+    Administrator --> UC9
+    Administrator --> UC10
+    Administrator --> UC11
+```
+
+### 4.1.2 Context Diagram
+```mermaid
+flowchart LR
+    User([User: Student/Mod/Admin])
+    UniArchive[UniArchive System]
+    DB[(PostgreSQL & FAISS)]
+    OCR[Tesseract OCR Engine]
+
+    User -- "Uploads & Queries" --> UniArchive
+    UniArchive -- "Stores/Retrieves Metadata & Vectors" --> DB
+    UniArchive -- "Sends Images" --> OCR
+    OCR -- "Returns Extracted Text" --> UniArchive
+    UniArchive -- "Returns Search Results" --> User
+```
+
+### 4.1.3 Data Flow Diagram (DFD Level 0)
+```mermaid
+flowchart TD
+    ExtUser([User])
+    P1((Process Upload))
+    P2((Process Search))
+    D1[(Document Storage)]
+    D2[(Vector Index)]
+
+    ExtUser -- "Document & Metadata" --> P1
+    P1 -- "Extracted Text & pHash" --> D1
+    P1 -- "Vector Embeddings" --> D2
+    
+    ExtUser -- "Search Query" --> P2
+    P2 -- "FTS Query" --> D1
+    P2 -- "Vector Query" --> D2
+    D1 -- "Keyword Matches" --> P2
+    D2 -- "Semantic Matches" --> P2
+    P2 -- "Fused Results (RRF)" --> ExtUser
+```
 
 ## 4.2 System Requirements
 
@@ -58,103 +126,50 @@ The system follows a modular, pipeline-based workflow inspired by RAG architectu
 ### 4.3.1 OCR Workflow Algorithm
 As illustrated below, the system accepts document uploads and determines processing paths based on format. Scanned documents undergo preprocessing (deskewing, denoising, contrast enhancement) before OCR processing using Tesseract. Confidence thresholding routes low-confidence extractions to manual review. Perceptual hashing detects duplicates before storage approval.
 
-```text
-[Start: User Uploads Document]
-            |
-            v
-[Determine Document Format]
-            |
-      +-----+-----+
-      |           |
-   [PDF]      [Image]
-      |           |
-      v           v
-[Extract Text]  [Preprocess Image]
-(if text-based)   (deskew, denoise,
-                  contrast enhance)
-                  |
-                  v
-            [Perform OCR]
-            (Tesseract 5.x)
-                  |
-                  +-----> [Confidence < Threshold?] 
-                  |            |
-                  |            Yes
-                  |            |
-                  |            v
-                  |      [Manual Review Queue]
-                  |            |
-                  |            No
-                  |            |
-                  +------------+
-                               |
-                               v
-                        [Store Extracted Text]
-                               |
-                               v
-                        [Generate pHash]
-                               |
-                               v
-                        [Check for Duplicates]
-                               |
-                         +-----+-----+
-                         |           |
-                     [Duplicate]  [New Document]
-                         |           |
-                         v           v
-                   [Reject/Link] [Proceed to Storage]
+```mermaid
+flowchart TD
+    Start([User Uploads Document]) --> Format{Determine Format}
+    
+    Format -->|PDF| Extract[Extract Text via PyMuPDF]
+    Format -->|Image| Preprocess[Preprocess Image: Deskew, Denoise, Enhance]
+    
+    Preprocess --> OCR[Perform OCR via Tesseract]
+    Extract --> SaveText
+    
+    OCR --> ConfCheck{Confidence < Threshold?}
+    ConfCheck -->|Yes| ManualQueue[Manual Review Queue]
+    ConfCheck -->|No| SaveText[Store Extracted Text]
+    
+    SaveText --> Hash[Generate pHash]
+    Hash --> DupCheck{Check for Duplicates}
+    
+    DupCheck -->|Duplicate Found| Reject[Reject / Link to Original]
+    DupCheck -->|New Document| Storage[Proceed to Storage & Indexing]
 ```
-*[Insert Flowchart Diagram corresponding to the text above]*
 
 ### 4.3.2 Semantic and Hybrid Search Workflow Algorithm
 User queries are parsed for keywords and filters. Parallel execution performs BM25-ranked keyword search and vector similarity search. Results are fused using Reciprocal Rank Fusion or weighted scoring, deduplicated, and presented with relevance snippets and source document references.
 
-```text
-[User Enters Query]
-        |
-        v
-[Parse Query Parameters]
-(keywords, filters, search_mode)
-        |
-        +---------> [Filters Specified?]
-        |                |
-        |                Yes
-        |                |
-        |                v
-        |           [Apply Metadata Filters]
-        |           (Course, Year, Type)
-        |                |
-        +----------------+
-        |
-        v
-[Parallel Search Execution]
-        |
-   +----+----+
-   |         |
-   v         v
-[Keyword    [Semantic
- Search]     Search]
-(PostgreSQL  (FAISS
- BM25)       Cosine Similarity)
-   |         |
-   +----+----+
-        |
-        v
-[Result Fusion]
-(Reciprocal Rank Fusion
- or weighted combination)
-        |
-        v
-[Rank and Deduplicate]
-        |
-        v
-[Return Results with
- Snippets and Source Links]
-        |
-        v
-[User Views/Downloads]
+```mermaid
+flowchart TD
+    Start([User Enters Query]) --> Parse[Parse Query Parameters]
+    Parse --> FilterCheck{Filters Specified?}
+    
+    FilterCheck -->|Yes| ApplyFilters[Apply Metadata Filters]
+    FilterCheck -->|No| ParallelExec
+    
+    ApplyFilters --> ParallelExec[Parallel Search Execution]
+    
+    ParallelExec --> KeywordSearch[Keyword Search: PostgreSQL BM25]
+    ParallelExec --> SemanticSearch[Semantic Search: FAISS Cosine]
+    
+    KeywordSearch --> Fusion
+    SemanticSearch --> Fusion
+    
+    Fusion[Result Fusion: Reciprocal Rank Fusion] --> Deduplicate[Rank & Deduplicate]
+    Deduplicate --> Return[Return Results with Snippets]
+    Return --> End([User Views/Downloads])
 ```
-*[Insert Flowchart Diagram corresponding to the text above]*
 
 ## 4.4 Dataset Description
 For analysis and testing, a controlled dataset was utilized, containing clean digital PDFs to establish baseline extraction speeds, and heavily skewed, noisy scanned images to calibrate the OpenCV thresholding algorithms to ensure the OCR pipeline met the functional requirements.
