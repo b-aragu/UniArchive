@@ -69,6 +69,17 @@ class SearchResult(DocumentOut):
     search_type: str | None = None  # 'keyword', 'semantic', 'hybrid'
 
 
+class SemanticSearchResult(BaseModel):
+    document_id: str
+    title: str
+    course_code: str | None = None
+    document_type: str | None = None
+    score: float
+    matching_chunk: str | None = None
+    extraction_method: str | None = None
+    ocr_confidence: float | None = None
+
+
 class PaginatedDocuments(BaseModel):
     """Paginated response wrapper."""
     items: list[DocumentOut]

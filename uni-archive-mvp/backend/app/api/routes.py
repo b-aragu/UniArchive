@@ -13,9 +13,11 @@ from app.core.security import get_current_user
 from app.db.database import get_db
 from app.models.user import User
 from app.models.document import Document
-from app.schemas.document import DocumentOut, DocumentDetail, PaginatedDocuments, SearchResult
+from app.schemas.document import DocumentOut, DocumentDetail, PaginatedDocuments, SearchResult, SemanticSearchResult
 from app.services.ocr_service import extract_text_from_file
 from app.services.search_service import search_documents
+from app.models.search_log import SearchLog
+from app.services.semantic_service import process_and_store_document, search_semantic
 
 router = APIRouter()
 
@@ -100,6 +102,15 @@ async def upload_document(
     db.add(doc)
     db.commit()
     db.refresh(doc)
+    
+    # Phase 7: Semantic Indexing
+    try:
+        if ocr_text:
+            process_and_store_document(db, doc.id, ocr_text)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Semantic indexing failed for {doc.id}: {e}")
+        
     return doc
 
 @router.get("/search", response_model=list[SearchResult])
@@ -118,6 +129,36 @@ def search(
         data.search_type = "keyword"
         output.append(data)
     return output
+
+@router.get("/search/semantic", response_model=list[SemanticSearchResult])
+def api_search_semantic(
+    query: str,
+    course_id: UUID | None = None,
+    document_type_id: UUID | None = None,
+    limit: int = 10,
+    db: Session = Depends(get_db)
+):
+    import time
+    start_time = time.time()
+    
+    results = search_semantic(db, query, limit=limit, course_id=course_id, document_type_id=document_type_id)
+    
+    try:
+        response_time_ms = (time.time() - start_time) * 1000.0
+        log_entry = SearchLog(
+            user_id=None,
+            query_text=query,
+            search_type="semantic",
+            result_count=len(results),
+            response_time_ms=response_time_ms
+        )
+        db.add(log_entry)
+        db.commit()
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Failed to log semantic search: {e}")
+        
+    return results
 
 @router.get("/documents/{document_id}", response_model=DocumentDetail)
 def get_document(document_id: UUID, db: Session = Depends(get_db)):
