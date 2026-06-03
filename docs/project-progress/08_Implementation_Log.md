@@ -107,3 +107,78 @@ This log is an ongoing record of architectural changes, file additions, refactor
   * `[MODIFY]` [`backend/app/schemas/document.py`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/app/schemas/document.py)
   * `[MODIFY]` [`backend/requirements.txt`](file:///home/baragu/Documents/UniArchive/uni-archive-mvp/backend/requirements.txt)
 * **Outcome:** The `embeddings` table now includes an auto-incrementing `faiss_id`. A new `/api/search/semantic` endpoint routes vector queries, matching against a local FAISS `IndexIDMap`. Document uploads automatically chunk text (500 chars / 50 overlap) and index the resulting embeddings without blocking upload success upon failure.
+
+---
+
+### [2026-06-03] — Documentation & Final Preparation Package
+* **Phase:** Phases 8, 10, and 11
+* **Action:** Generated extensive non-blocking documentation to prepare for the final supervisor presentation, final report submission, and upcoming implementation phases.
+* **Files Affected:**
+  * `[NEW]` `docs/final-demo/Demo_Script.md`
+  * `[NEW]` `docs/final-demo/Supervisor_Walkthrough.md`
+  * `[NEW]` `docs/final-demo/Sample_Searches.md`
+  * `[NEW]` `docs/final-demo/Architecture_One_Page.md`
+  * `[NEW]` `docs/final-demo/Project_Overview_One_Page.md`
+  * `[NEW]` `docs/final-demo/Demo_Dataset_Plan.md`
+  * `[NEW]` `docs/final-report/Chapter1_Introduction.md`
+  * `[NEW]` `docs/final-report/Chapter2_Literature_Review.md`
+  * `[NEW]` `docs/final-report/Chapter3_Methodology.md`
+  * `[NEW]` `docs/final-report/Chapter4_Implementation.md`
+  * `[NEW]` `docs/final-report/Chapter5_Testing_and_Results.md`
+  * `[NEW]` `docs/final-report/Chapter6_Conclusion.md`
+  * `[NEW]` `docs/presentation/presentation_outline.md`
+  * `[NEW]` `docs/project-progress/12_Frontend_Audit_and_Implementation_Plan.md`
+  * `[NEW]` `docs/project-progress/13_Phase_8_Hybrid_Search_Implementation_Plan.md`
+  * `[MODIFY]` `docs/project-progress/01_Project_Status_Report.md`
+  * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
+* **Outcome:** The project now has a complete skeleton for the final academic report, a structured presentation outline, clear demo scripts, and concrete design plans for the upcoming Hybrid Search and Frontend phases. Overall progress increased to 65%.
+
+---
+
+### [2026-06-03] — Phase 10 Frontend Preparation Package
+* **Phase:** Phase 10: Frontend Implementation
+* **Action:** Generated frontend component architecture, routing structure, state management plans, and UI wireframe mockups without modifying codebase logic.
+* **Files Affected:**
+  * `[NEW]` `docs/frontend-design/Component_Map.md`
+  * `[NEW]` `docs/frontend-design/Route_Map.md`
+  * `[NEW]` `docs/frontend-design/API_Integration_Map.md`
+  * `[NEW]` `docs/frontend-design/State_Management_Plan.md`
+  * `[MODIFY]` `docs/project-progress/01_Project_Status_Report.md`
+  * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
+* **Outcome:** The frontend development phase is now fully scoped and designed. Component trees, React Router v6 pathing, JWT-based Redux/Context auth flows, and precise API endpoint mappings have been established.
+
+---
+
+### [2026-06-03] — Phase 10 Frontend Implementation MVP
+* **Phase:** Phase 10: Frontend Implementation
+* **Action:** Bootstrapped the React MVP utilizing `react-router-dom` and `lucide-react`. Implemented `AuthContext`, JWT-based Axios interceptors, protected routing, and built functional React pages for Login, Register, Dashboard, Upload, Search, and Document Details.
+* **Files Affected:**
+  * `[NEW]` `frontend/src/api/client.ts`
+  * `[NEW]` `frontend/src/context/AuthContext.tsx`
+  * `[NEW]` `frontend/src/components/ProtectedRoute.tsx`
+  * `[NEW]` `frontend/src/components/AppShell.tsx`
+  * `[NEW]` `frontend/src/pages/auth/LoginPage.tsx`
+  * `[NEW]` `frontend/src/pages/auth/RegisterPage.tsx`
+  * `[NEW]` `frontend/src/pages/dashboard/DashboardPage.tsx`
+  * `[NEW]` `frontend/src/pages/documents/UploadPage.tsx`
+  * `[NEW]` `frontend/src/pages/documents/DocumentDetailPage.tsx`
+  * `[NEW]` `frontend/src/pages/search/SearchPage.tsx`
+  * `[NEW]` `frontend/src/pages/admin/AdminPanel.tsx`
+  * `[NEW]` `frontend/src/pages/admin/ModeratorPanel.tsx`
+  * `[NEW]` `docs/project-progress/14_Phase_10_Frontend_Implementation_Report.md`
+  * `[MODIFY]` `frontend/src/App.tsx`
+  * `[MODIFY]` `frontend/src/vite-env.d.ts`
+  * `[MODIFY]` `frontend/package.json`
+* **Outcome:** The frontend MVP has been fully implemented, successfully handling authentication, form parsing, file uploading, vector search, and admin dashboards with zero build or TypeScript errors.
+
+---
+
+### [2026-06-03] — Phase 7: Semantic Search Verification
+* **Phase:** Phase 7: Validation
+* **Action:** Bypassed GPU/CUDA requirements by installing PyTorch 2.8.0+cpu and downgrading NumPy to resolve FAISS incompatibilities. Created a mock document seeder script and validated the full SBERT/FAISS pipeline.
+* **Files Affected:**
+  * `[NEW]` `backend/scripts/seed_demo_documents.py`
+  * `[NEW]` `docs/project-progress/16_Phase_7_Semantic_Search_Verification_Report.md`
+  * `[MODIFY]` `docs/project-progress/01_Project_Status_Report.md`
+  * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
+* **Outcome:** Successfully seeded 6 documents, generated text embeddings via CPU model inference, and indexed them into FAISS. Verified vector queries returned the correct documents with high similarity scores. The Phase 7 Semantic Search engine is now confirmed stable and integrated.

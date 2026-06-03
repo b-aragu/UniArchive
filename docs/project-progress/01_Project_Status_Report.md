@@ -15,29 +15,25 @@ This report provides a high-level overview of the current status of the **UniArc
 
 ## 2. Project Completion Metrics
 
-### Overall Progress: **58% Complete**
+### Overall Progress: **65% Complete**
 
 | Phase | Description | Weight | Status | Est. Completion Date |
 |:---|:---|:---:|:---|:---|
-| **Phase 1** | Requirements Engineering & Traceability Matrix | 5% | ✅ Complete | May 30, 2026 |
-| **Phase 2** | Codebase Audit & Gap Analysis | 5% | ✅ Complete | May 31, 2026 |
-| **Phase 3** | Architecture & Foundation | 10% | ✅ Complete | June 1, 2026 |
+| **Phase 1** | Scaffolding & Setup | 5% | ✅ Complete | May 30, 2026 |
+| **Phase 2** | Architecture Documentation | 5% | ✅ Complete | May 31, 2026 |
+| **Phase 3** | Authentication & RBAC Design | 5% | ✅ Complete | June 1, 2026 |
 | **Phase 4** | Database Design & Migration Setup | 10% | ✅ Complete | June 2, 2026 |
 | **Phase 5** | Core FastAPI Backend & RBAC | 15% | ✅ Complete | June 3, 2026 |
 | **Phase 6** | OCR Preprocessing & Fallback Pipeline | 10% | ✅ Complete | June 3, 2026 |
 | **Phase 7** | Semantic Search (SBERT & FAISS) | 10% | ✅ Complete | June 3, 2026 |
-| **Phase 8** | Hybrid Search (RFF) | 5% | ⏳ Not Started | June 18, 2026 |
+| **Phase 8** | Hybrid Search (RFF) | 5% | ⏳ Planning | June 18, 2026 |
 | **Phase 9** | Duplicate Detection (pHash & Text Similarity) | 5% | ⏳ Not Started | June 22, 2026 |
-| **Phase 10** | Frontend Implementation (React/TS/Vite) | 15% | ⏳ Not Started | July 05, 2026 |
-| **Phase 11** | Security Hardening (Rate limits, Magic types) | 5% | ⏳ Not Started | July 08, 2026 |
-| **Phase 12** | Integrated Testing (Unit, Integration, E2E) | 5% | ⏳ Not Started | July 15, 2026 |
-| **Phase 13** | Academic Deliverables & System Docs | 5% | ⏳ Not Started | July 20, 2026 |
-| **Phase 14** | Supervisor Demo Preparation | 5% | ⏳ Not Started | July 25, 2026 |
+| **Phase 10**| Frontend Implementation (React/TS/Vite) | 15% | ✅ Complete | July 05, 2026 |
+| **Phase 11**| Final Testing, Demo Prep & Deployment | 15% | ⏳ Prep Started | July 15, 2026 |
 
 ---
 
 ## 3. Major Accomplishments
-
 1. **Version Control Initialization:** Git repository initialized with a clean baseline, branch structure, and strict `.gitignore` patterns protecting system artifacts.
 2. **Normalized Database Schema:** Designed and deployed a 15-table relational schema using SQLAlchemy, transitioning from a flat layout to a normalized academic hierarchy (Universities, Faculties, Departments, Courses, Semesters).
 3. **Database Migration Pipeline:** Established Alembic migration system, deprecating the fragile `Base.metadata.create_all()` runtime routine.
@@ -45,6 +41,7 @@ This report provides a high-level overview of the current status of the **UniArc
 5. **API Extension:** Implemented paginated document listing, secure file download and deletion controllers, and structured user management routes.
 6. **FTS Foundation:** Upgraded search service to run native PostgreSQL Full-Text Search (using GIN-indexed `search_vector` generated column) with relevance ranking (`ts_rank`).
 7. **Python 3.9 Backporting:** Resolved runtime compatibility constraints on the host machine using `eval_type_backport` and `from __future__ import annotations` imports.
+8. **Semantic Search Validation:** Integrated Sentence-BERT (`all-MiniLM-L6-v2`) and FAISS on CPU. Verified document chunking, embeddings generation, and vector retrieval with high relevance scores.
 
 ---
 
@@ -60,5 +57,41 @@ No technical blockers are currently delaying the project. The following risks ar
 ## 5. Key Milestones & Next Steps
 
 1. **Milestone 3 (June 10, 2026):** Complete Phase 6 OCR Preprocessing. ✅ (Validation Pass Completed: 100% Success Rate across 9 document topologies).
-2. **Milestone 4 (June 15, 2026):** Implement SBERT and FAISS indexing, marking the completion of semantic vector capability.
+2. **Milestone 4 (June 15, 2026):** Implement SBERT and FAISS indexing, marking the completion of semantic vector capability. ✅ (Validation Pass Completed: Pipeline successfully tested on CPU).
 3. **Milestone 5 (June 18, 2026):** Execute RRF logic merging keyword search and semantic vector search into hybrid retrieval.
+
+---
+
+## 6. Documentation Index
+
+### Architecture & Design
+*   [`02_System_Architecture.md`](./02_System_Architecture.md)
+*   [`03_API_Design.md`](./03_API_Design.md)
+*   [`06_Database_Dictionary.md`](./06_Database_Dictionary.md)
+*   [`12_Frontend_Audit_and_Implementation_Plan.md`](./12_Frontend_Audit_and_Implementation_Plan.md)
+*   [`13_Phase_8_Hybrid_Search_Implementation_Plan.md`](./13_Phase_8_Hybrid_Search_Implementation_Plan.md)
+*   [`../frontend-design/Component_Map.md`](../frontend-design/Component_Map.md)
+*   [`../frontend-design/Route_Map.md`](../frontend-design/Route_Map.md)
+*   [`../frontend-design/API_Integration_Map.md`](../frontend-design/API_Integration_Map.md)
+*   [`../frontend-design/State_Management_Plan.md`](../frontend-design/State_Management_Plan.md)
+
+### Implementation Reports
+*   [`07_Phase_5_Implementation_Report.md`](./07_Phase_5_Implementation_Report.md)
+*   [`08_Implementation_Log.md`](./08_Implementation_Log.md)
+*   [`09_Phase_6_OCR_Implementation_Report.md`](./09_Phase_6_OCR_Implementation_Report.md)
+*   [`10_OCR_Verification_Report.md`](./10_OCR_Verification_Report.md)
+*   [`11_Phase_7_Semantic_Search_Implementation_Report.md`](./11_Phase_7_Semantic_Search_Implementation_Report.md)
+*   [`14_Phase_10_Frontend_Implementation_Report.md`](./14_Phase_10_Frontend_Implementation_Report.md)
+*   [`16_Phase_7_Semantic_Search_Verification_Report.md`](./16_Phase_7_Semantic_Search_Verification_Report.md)
+
+### Final Report & Demo
+*   [`../final-report/Chapter1_Introduction.md`](../final-report/Chapter1_Introduction.md)
+*   [`../final-report/Chapter2_Literature_Review.md`](../final-report/Chapter2_Literature_Review.md)
+*   [`../final-report/Chapter3_Methodology.md`](../final-report/Chapter3_Methodology.md)
+*   [`../final-report/Chapter4_Implementation.md`](../final-report/Chapter4_Implementation.md)
+*   [`../final-report/Chapter5_Testing_and_Results.md`](../final-report/Chapter5_Testing_and_Results.md)
+*   [`../final-report/Chapter6_Conclusion.md`](../final-report/Chapter6_Conclusion.md)
+*   [`../final-demo/Demo_Script.md`](../final-demo/Demo_Script.md)
+*   [`../final-demo/Supervisor_Walkthrough.md`](../final-demo/Supervisor_Walkthrough.md)
+*   [`../final-demo/Architecture_One_Page.md`](../final-demo/Architecture_One_Page.md)
+*   [`../presentation/presentation_outline.md`](../presentation/presentation_outline.md)
