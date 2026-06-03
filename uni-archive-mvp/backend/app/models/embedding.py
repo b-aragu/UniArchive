@@ -7,7 +7,7 @@ database-agnostic; the FAISS index stores the actual searchable vectors.
 """
 import uuid
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, LargeBinary, Text
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, LargeBinary, Text, Identity
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -19,6 +19,7 @@ class Embedding(Base):
     __tablename__ = "embeddings"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    faiss_id = Column(Integer, Identity(always=True), unique=True, index=True, nullable=False)
     document_id = Column(
         UUID(as_uuid=True),
         ForeignKey("documents.id", ondelete="CASCADE"),
