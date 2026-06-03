@@ -3,7 +3,7 @@
 **Project Name:** UniArchive: Intelligent Academic Document Retrieval System with OCR and Semantic Search  
 **Author:** Final Year Project Team  
 **Date:** June 3, 2026  
-**Status:** In Progress (Tier 1 Foundation & Core Backend Complete)
+**Status:** Complete (MVP Polished & Demo-Ready)
 
 ---
 
@@ -15,7 +15,7 @@ This report provides a high-level overview of the current status of the **UniArc
 
 ## 2. Project Completion Metrics
 
-### Overall Progress: **95% Complete**
+### Overall Progress: **100% Complete**
 
 | Phase | Description | Weight | Status | Est. Completion Date |
 |:---|:---|:---:|:---|:---|
@@ -89,6 +89,7 @@ No technical blockers are currently delaying the project. The following risks ar
 *   [`17_Phase_8_Hybrid_Search_Evaluation_Report.md`](./17_Phase_8_Hybrid_Search_Evaluation_Report.md)
 *   [`18_Phase_9_Duplicate_Detection_Report.md`](./18_Phase_9_Duplicate_Detection_Report.md)
 *   [`19_End_To_End_MVP_Verification_Report.md`](./19_End_To_End_MVP_Verification_Report.md)
+*   [`20_Final_UI_Functionality_Polish_Report.md`](./20_Final_UI_Functionality_Polish_Report.md)
 
 ### Final Report & Demo
 *   [`../final-report/Chapter1_Introduction.md`](../final-report/Chapter1_Introduction.md)

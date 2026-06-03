@@ -96,10 +96,19 @@ export const UploadPage: React.FC = () => {
               <CheckCircle size={20} /> {message}
             </div>
             {result && (
-              <div style={{ fontSize: '0.875rem', backgroundColor: 'white', padding: '12px', borderRadius: '4px' }}>
+              <div style={{ fontSize: '0.875rem', backgroundColor: 'white', padding: '12px', borderRadius: '4px', marginTop: '12px' }}>
                 <p style={{ margin: '0 0 4px 0' }}><strong>Extraction:</strong> {result.extraction_method}</p>
                 <p style={{ margin: '0 0 4px 0' }}><strong>Confidence:</strong> {result.ocr_confidence ? `${Math.round(result.ocr_confidence)}%` : 'N/A'}</p>
-                <p style={{ margin: 0 }}><strong>Pages:</strong> {result.page_count}</p>
+                <p style={{ margin: '0 0 12px 0' }}><strong>Pages:</strong> {result.page_count}</p>
+                <a href={`/documents/${result.id}`} style={{ display: 'inline-block', backgroundColor: '#ecfdf5', color: '#065f46', textDecoration: 'none', padding: '6px 12px', borderRadius: '4px', border: '1px solid #a7f3d0', fontWeight: 'bold' }}>View Document</a>
+              </div>
+            )}
+            {result?.duplicate_warning && result.duplicate_warning.length > 0 && (
+              <div style={{ marginTop: '16px', padding: '12px', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '4px', color: '#b45309' }}>
+                <p style={{ margin: '0 0 8px 0', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <AlertCircle size={16} /> Possible Duplicate Detected!
+                </p>
+                <p style={{ margin: 0, fontSize: '0.875rem' }}>This document appears similar to existing documents in the system. It has been flagged for moderator review.</p>
               </div>
             )}
           </div>

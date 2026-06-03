@@ -23,6 +23,8 @@ export const SearchPage: React.FC = () => {
       let endpoint = '/api/search';
       if (mode === 'semantic') {
         endpoint = '/api/search/semantic';
+      } else if (mode === 'hybrid') {
+        endpoint = '/api/search/hybrid';
       }
       
       const response = await apiClient.get(endpoint, {
@@ -33,8 +35,8 @@ export const SearchPage: React.FC = () => {
       
       setResults(response.data || []);
     } catch (err: any) {
-      if (mode === 'semantic' && err.message === 'Network Error') {
-        setError('Semantic search engine is currently offline or still initializing.');
+      if ((mode === 'semantic' || mode === 'hybrid') && err.message === 'Network Error') {
+        setError(`${mode === 'semantic' ? 'Semantic' : 'Hybrid'} search engine is currently offline or still initializing.`);
       } else {
         setError(err.response?.data?.detail || 'Search failed. Please try again.');
       }
@@ -86,11 +88,10 @@ export const SearchPage: React.FC = () => {
           </button>
           <button 
             type="button"
-            disabled
-            title="Coming in Phase 8"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '20px', border: '1px solid #e5e7eb', backgroundColor: '#f9fafb', color: '#9ca3af', cursor: 'not-allowed', fontWeight: '500' }}
+            onClick={() => setMode('hybrid')}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '20px', border: mode === 'hybrid' ? '2px solid #10b981' : '1px solid #d1d5db', backgroundColor: mode === 'hybrid' ? '#ecfdf5' : 'white', color: mode === 'hybrid' ? '#047857' : '#4b5563', cursor: 'pointer', fontWeight: '500' }}
           >
-            Hybrid (Beta)
+            <Search size={18} /> Hybrid (Fusion)
           </button>
         </div>
       </div>
@@ -110,20 +111,49 @@ export const SearchPage: React.FC = () => {
           {results.map((item, idx) => (
             <div key={idx} style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                <Link to={`/documents/${item.id || item.document_id}`} style={{ textDecoration: 'none', color: '#1d4ed8', fontSize: '1.25rem', fontWeight: 'bold' }}>
-                  {item.title}
-                </Link>
-                <span style={{ backgroundColor: mode === 'semantic' ? '#f5f3ff' : '#eff6ff', color: mode === 'semantic' ? '#6d28d9' : '#1d4ed8', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                  Score: {item.score || item.relevance_score ? Math.round((item.score || item.relevance_score) * 100) / 100 : 'N/A'}
-                </span>
+                <div>
+                  <Link to={`/documents/${item.id || item.document_id}`} style={{ textDecoration: 'none', color: '#1d4ed8', fontSize: '1.25rem', fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>
+                    {item.title}
+                  </Link>
+                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                    {item.course ? `Course: ${item.course}` : 'Unknown Course'} | {item.document_type || 'Document'} | {new Date(item.created_at || Date.now()).getFullYear()}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ backgroundColor: mode === 'semantic' ? '#f5f3ff' : mode === 'hybrid' ? '#ecfdf5' : '#eff6ff', color: mode === 'semantic' ? '#6d28d9' : mode === 'hybrid' ? '#047857' : '#1d4ed8', padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                    Score: {item.score || item.relevance_score ? Math.round((item.score || item.relevance_score) * 100) / 100 : 'N/A'}
+                  </span>
+                </div>
               </div>
               
               <div style={{ fontSize: '0.875rem', color: '#4b5563', marginBottom: '16px', lineHeight: '1.5', fontStyle: 'italic', borderLeft: '3px solid #d1d5db', paddingLeft: '12px' }}>
                 "{item.matching_chunk || item.snippet || 'No snippet available.'}"
               </div>
               
-              <div style={{ display: 'flex', gap: '16px', fontSize: '0.75rem', color: '#9ca3af' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FileText size={14} /> Extraction: {item.extraction_method || 'Unknown'}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '16px', fontSize: '0.75rem', color: '#9ca3af' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FileText size={14} /> Extraction: {item.extraction_method || 'Unknown'}</span>
+                </div>
+                <button 
+                  onClick={async () => {
+                    try {
+                      const id = item.id || item.document_id;
+                      const response = await apiClient.get(`/api/documents/${id}/download`, { responseType: 'blob' });
+                      const url = window.URL.createObjectURL(new Blob([response.data]));
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.setAttribute('download', item.title + '.pdf');
+                      document.body.appendChild(link);
+                      link.click();
+                      link.remove();
+                    } catch (err) {
+                      alert('Download failed.');
+                    }
+                  }}
+                  style={{ backgroundColor: 'transparent', color: '#3b82f6', border: '1px solid #3b82f6', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 'bold' }}
+                >
+                  Download
+                </button>
               </div>
             </div>
           ))}
