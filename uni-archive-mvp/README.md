@@ -2,21 +2,64 @@
 
 UniArchive is an intelligent, scalable academic document repository. It features a robust Python/FastAPI backend, a modern React/Vite frontend, and integrates advanced capabilities like PostgreSQL Full-Text Search, Tesseract OCR, PyMuPDF digital extraction, FAISS Semantic Vector Search (Sentence-BERT), Reciprocal Rank Fusion (Hybrid Search), and pHash Duplicate Detection.
 
-## Features Completed
-- **Role-Based Access Control (RBAC):** Students, Moderators, and Administrators.
-- **Automated OCR Pipeline:** Extracts text from PDFs and images seamlessly.
-- **Duplicate Detection:** Prevents storage redundancy via perceptual hashing.
-- **Multi-Mode Search Engine:** Keyword (FTS), Semantic (FAISS), and Hybrid (RRF).
-- **Responsive Dashboard:** Upload, search, and manage documents seamlessly.
+---
+
+## 🛠️ Technology Stack
+
+### Backend
+* **FastAPI (Python 3.9+)**: High-performance web framework for API routing.
+* **SQLAlchemy (v2.0+)**: Modern SQL toolkit and Object Relational Mapper.
+* **Alembic**: Database migration tool for SQLAlchemy.
+* **Uvicorn**: Lightning-fast ASGI web server implementation.
+* **Pytest**: Backend testing suite for endpoint and integration verification.
+
+### Database & Vector Search
+* **PostgreSQL (v16)**: Relational database with full-text search (FTS) indexing (`pg_trgm`).
+* **FAISS (Facebook AI Similarity Search)**: Vector index database used for efficient similarity searches of dense vector embeddings.
+
+### Artificial Intelligence & Processing Pipelines
+* **OCR & Preprocessing**:
+  * **Tesseract OCR**: Optical Character Recognition engine for text extraction from scans and images.
+  * **OpenCV (cv2)**: Digital image processing library used for image binarization, denoising, contrast enhancement, and deskewing.
+  * **PyMuPDF (fitz)**: Lightweight PDF extraction engine for parsing digital documents.
+* **Semantic Embeddings**:
+  * **Sentence-Transformers (`all-MiniLM-L6-v2`)**: Compact, high-quality Sentence-BERT model (~90MB) used to convert text paragraphs into 384-dimensional semantic vector embeddings.
+* **Hybrid Search Retrieval**:
+  * **Reciprocal Rank Fusion (RRF)**: Custom search algorithm blending and re-ranking keyword FTS scores and semantic cosine-similarity scores.
+* **Perceptual Hashing**:
+  * **ImageHash (pHash)**: Computes perceptual image hashes to detect visually matching images/pages and prevent duplicate uploads.
+
+### Frontend
+* **Vite**: Modern, blazing-fast frontend build tool.
+* **React (v19)**: User interface building library.
+* **TypeScript**: Type safety layer for frontend code.
+* **React Router Dom (v7)**: SPA client-side routing.
+* **Axios**: Promised-based HTTP client for API communication.
+* **Lucide React**: Premium, modern icon set.
+* **CSS Grid & Flexbox**: Fully responsive custom styling system.
 
 ---
 
-## 1. Installation & Environment Setup
+## 🌟 Core Features
+
+* **Automated Extraction Pipeline**: Automatically chooses between PyMuPDF (for digital PDFs) and Tesseract OCR (for scanned PDFs/images) with OpenCV image quality enhancement.
+* **Document Library Page**: Mapped to `/documents` with support for Card and Compact List layouts, multi-metric sorting (Date, Title, OCR Confidence), and advanced hierarchical filters (Course, Semester, Document Type).
+* **Secure Document Previews**: Interactive `/documents/:id` page featuring a tabbed interface:
+  * **Original File Tab**: Dynamically renders PDFs inside an embedded iframe or images via secure local Object URLs generated from authenticated backend streams (`/api/documents/{id}/download`).
+  * **Extracted Text Tab**: Displays extracted raw text, OCR confidence ratings, processing time, and indexing parameters.
+* **Interactive Upload UX**: A complete state machine with title auto-population, processing spinners, instant results feedback, and form resetting.
+* **Multi-Mode Search Engine**: Includes FTS Keyword Search, FAISS Semantic Search, and RRF Hybrid Search.
+* **Duplicate Detection**: Computes perceptual hashes during upload to warn users of duplicate content before storing.
+* **Role-Based Access Control (RBAC)**: Supports roles (`Student`, `Moderator`, `Administrator`). Students only see approved files or their own uploads; Moderators/Admins see and manage the entire library.
+
+---
+
+## 🚀 Installation & Environment Setup
 
 ### Prerequisites
-- Docker & Docker Compose
-- Python 3.9+ (if running locally without Docker)
-- Node.js 18+ (if running frontend locally)
+* Docker & Docker Compose
+* Python 3.9+ (if running locally without Docker)
+* Node.js 18+ (if running frontend locally)
 
 ### Clone the Repository
 ```bash
@@ -25,8 +68,7 @@ cd UniArchive/uni-archive-mvp
 ```
 
 ### Environment Variables
-Copy the `.env.example` to `.env` inside the `backend` directory.
-
+Copy `.env.example` to `.env` inside the `backend` directory:
 ```bash
 cp backend/.env.example backend/.env
 ```
@@ -34,18 +76,18 @@ Ensure the `DATABASE_URL` matches your local or Docker PostgreSQL instance.
 
 ---
 
-## 2. Docker Production Deployment (Recommended)
-You can deploy the entire stack (Database, Backend, Frontend) with a single command using the provided production compose file.
+## 🐳 Docker Production Deployment (Recommended)
+You can deploy the entire stack (Database, Backend, Frontend) with a single command using the provided production compose file:
 
 ```bash
 docker-compose -f docker-compose.production.yml up --build -d
 ```
-- **Frontend** will be available at: `http://localhost:80`
-- **Backend API** will be available at: `http://localhost:8000/docs`
+* **Frontend** will be available at: `http://localhost:80`
+* **Backend API** will be available at: `http://localhost:8000/docs`
 
 ---
 
-## 3. Local Development Setup
+## 💻 Local Development Setup
 
 If you prefer to run the services individually for development or debugging:
 
@@ -82,17 +124,17 @@ The frontend will run at `http://localhost:5173`.
 
 ---
 
-## 4. Demo Credentials
-To evaluate the system, use the following pre-seeded credentials depending on the desired role:
+## 🔑 Demo Credentials
+To evaluate the system, use the following pre-seeded credentials:
 
-*   **Administrator**: `admin@test.com` / `password123`
-*   **Moderator**: `mod@test.com` / `password123`
-*   **Student**: `student@test.com` / `password123`
+* **Administrator**: `admin@test.com` / `password123`
+* **Moderator**: `mod@test.com` / `password123`
+* **Student**: `student@test.com` / `password123`
 
 ---
 
-## 5. Troubleshooting
+## 🔧 Troubleshooting
 
-*   **Port 5432 Conflicts:** The local `docker-compose.yml` maps PostgreSQL to port `5433` on the host to avoid conflicts. Ensure `DATABASE_URL` in your `.env` reflects this if running the backend locally (`localhost:5433`).
-*   **Model Download Delays:** On the first execution of the semantic search or upload pipelines, the `sentence-transformers` library will download the `all-MiniLM-L6-v2` model (~90MB). This may cause the first request to be slow.
-*   **Tesseract Not Found:** If running the backend locally (not in Docker), you must install `tesseract-ocr` and `libgl1` on your host operating system. (e.g., `sudo apt-get install tesseract-ocr libgl1`).
+* **Port 5432 Conflicts:** The local `docker-compose.yml` maps PostgreSQL to port `5433` on the host to avoid conflicts. Ensure `DATABASE_URL` in your `.env` reflects this if running the backend locally (`localhost:5433`).
+* **Model Download Delays:** On the first execution of semantic search or upload pipelines, `sentence-transformers` will download the `all-MiniLM-L6-v2` model (~90MB). This may cause the first request to be slow.
+* **Tesseract Not Found:** If running the backend locally, install `tesseract-ocr` and `libgl1` on your host operating system (e.g., `sudo apt-get install tesseract-ocr libgl1`).
