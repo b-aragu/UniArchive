@@ -54,73 +54,65 @@ UniArchive is an intelligent, scalable academic document repository. It features
 
 ---
 
-## 🚀 Installation & Environment Setup
+## 🚀 Setup & Running the Project (Recommended - venv)
+
+The project is run locally using a Python virtual environment (`venv`) for the backend and Node/npm for the frontend.
 
 ### Prerequisites
-* Docker & Docker Compose
-* Python 3.9+ (if running locally without Docker)
-* Node.js 18+ (if running frontend locally)
-
-### Clone the Repository
-```bash
-git clone https://github.com/yourusername/UniArchive.git
-cd UniArchive/uni-archive-mvp
-```
-
-### Environment Variables
-Copy `.env.example` to `.env` inside the `backend` directory:
-```bash
-cp backend/.env.example backend/.env
-```
-Ensure the `DATABASE_URL` matches your local or Docker PostgreSQL instance.
+* **Python 3.9+** (with `venv` and `pip`)
+* **Node.js 18+** (with `npm`)
+* **PostgreSQL** (either installed locally, or run via Docker Compose)
+* **Tesseract OCR** (for image text extraction, e.g. `sudo apt-get install tesseract-ocr libgl1`)
 
 ---
 
-## 🐳 Docker Production Deployment (Recommended)
-You can deploy the entire stack (Database, Backend, Frontend) with a single command using the provided production compose file:
-
-```bash
-docker-compose -f docker-compose.production.yml up --build -d
-```
-* **Frontend** will be available at: `http://localhost:80`
-* **Backend API** will be available at: `http://localhost:8000/docs`
-
----
-
-## 💻 Local Development Setup
-
-If you prefer to run the services individually for development or debugging:
-
-### Start PostgreSQL
+### 1. Database Setup
+If you don't have a local PostgreSQL instance running, you can start the pre-configured database container using Docker:
 ```bash
 docker-compose up -d db
 ```
+This starts PostgreSQL on port `5433` as defined in `docker-compose.yml`.
 
-### Backend Setup (Migrations & Seeding)
+---
+
+### 2. Backend Setup (venv)
+Navigate to the backend directory, copy the environment configuration, set up the virtual environment, install dependencies, run migrations, and seed the test database:
 ```bash
 cd backend
+
+# Copy environment variables
+cp .env.example .env
+
+# Initialize and activate Python virtual environment
 python -m venv .venv
 source .venv/bin/activate
+
+# Install requirements
 pip install -r requirements.txt
 
-# Run Alembic migrations to construct the schema
+# Run migrations to build database schema
 alembic upgrade head
 
-# Seed the database with roles and test data
+# Seed roles and sample data
 PYTHONPATH=. python scripts/seed_roles.py
 PYTHONPATH=. python scripts/seed_test_data.py
 
-# Start the server
+# Start the FastAPI backend
 uvicorn app.main:app --reload --port 8000
 ```
+* **Backend API** will be available at: `http://localhost:8000`
+* **API Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-### Frontend Setup
+---
+
+### 3. Frontend Setup
+In a separate terminal tab or window, install dependencies and start the Vite React development server:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-The frontend will run at `http://localhost:5173`.
+* **Frontend Application** will be available at: `http://localhost:5173`
 
 ---
 

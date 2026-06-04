@@ -119,3 +119,8 @@ class DuplicatePairOut(BaseModel):
 
 class RejectRequest(BaseModel):
     rejection_reason: str
+
+
+class FilterOptionsOut(BaseModel):
+    statuses: list[str]
+    extraction_methods: list[str]

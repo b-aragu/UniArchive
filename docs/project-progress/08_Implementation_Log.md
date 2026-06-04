@@ -264,3 +264,18 @@ This log is an ongoing record of architectural changes, file additions, refactor
   * `[MODIFY]` `docs/project-progress/20_Final_UI_Functionality_Polish_Report.md`
   * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
 * **Outcome:** The upload process is now robust, visually clear, and provides excellent feedback to the user throughout the entire lifecycle of the document upload.
+
+---
+
+### [2026-06-04] — Phase 12: Dynamic Document Filters
+* **Phase:** Phase 12: Dynamic Filtering & Live Metadata
+* **Action:** Created backend API endpoint `GET /api/documents/filter-options` to fetch distinct live database values for document statuses and extraction methods. Updated the frontend page `DocumentsPage.tsx` to dynamically query these options and map user-friendly labels. Implemented a fallback empty state when no metadata options exist.
+* **Files Affected:**
+  * `[NEW]` `docs/project-progress/26_Dynamic_Documents_Filters_Report.md`
+  * `[MODIFY]` `backend/app/schemas/document.py`
+  * `[MODIFY]` `backend/app/api/routes.py`
+  * `[MODIFY]` `frontend/src/pages/documents/DocumentsPage.tsx`
+  * `[MODIFY]` `docs/project-progress/01_Project_Status_Report.md`
+  * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
+* **Outcome:** The document filters are now dynamic, data-driven, and automatically display only real database values instead of hardcoded strings. The filter UI maps internal values (e.g. `duplicate_warning`) to readable titles (e.g. "Duplicate Warning") and behaves correctly under all role privileges.
+

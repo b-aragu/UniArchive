@@ -25,6 +25,8 @@ export const DocumentsPage: React.FC = () => {
   const [courses, setCourses] = useState<any[]>([]);
   const [documentTypes, setDocumentTypes] = useState<any[]>([]);
   const [semesters, setSemesters] = useState<any[]>([]);
+  const [availableStatuses, setAvailableStatuses] = useState<string[]>([]);
+  const [availableExtractions, setAvailableExtractions] = useState<string[]>([]);
 
   // Filter & Sorting state
   const [searchTitle, setSearchTitle] = useState('');
@@ -38,18 +40,45 @@ export const DocumentsPage: React.FC = () => {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'library' | 'my_uploads'>('library');
 
+  // Helper to cleanly render status labels
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'pending': return 'Pending Review';
+      case 'approved': return 'Approved';
+      case 'rejected': return 'Rejected';
+      case 'duplicate_warning': return 'Duplicate Warning';
+      default: return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+  };
+
+  // Helper to cleanly render extraction method labels
+  const getExtractionLabel = (method: string) => {
+    switch (method) {
+      case 'digital_pdf': return 'Digital PDF';
+      case 'image_ocr': return 'Image OCR';
+      case 'scanned_pdf_ocr': return 'Scanned PDF OCR';
+      default: return method.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+  };
+
   // Load all lookup data for filters
   useEffect(() => {
     const fetchLookups = async () => {
       try {
-        const [coursesRes, typesRes, semestersRes] = await Promise.all([
+        const [coursesRes, typesRes, semestersRes, filterOptionsRes] = await Promise.all([
           apiClient.get('/api/courses'),
           apiClient.get('/api/document-types'),
-          apiClient.get('/api/semesters')
+          apiClient.get('/api/semesters'),
+          apiClient.get('/api/documents/filter-options').catch(err => {
+            console.error('Failed to load filter options', err);
+            return { data: { statuses: [], extraction_methods: [] } };
+          })
         ]);
         setCourses(coursesRes.data || []);
         setDocumentTypes(typesRes.data || []);
         setSemesters(semestersRes.data || []);
+        setAvailableStatuses(filterOptionsRes.data?.statuses || []);
+        setAvailableExtractions(filterOptionsRes.data?.extraction_methods || []);
       } catch (err) {
         console.error('Failed to load lookup metadata', err);
       }
@@ -252,63 +281,72 @@ export const DocumentsPage: React.FC = () => {
             <SlidersHorizontal size={14} /> Filters:
           </div>
 
-          {/* Course Filter */}
-          <select 
-            value={selectedCourse} 
-            onChange={(e) => { setSelectedCourse(e.target.value); setPage(1); }}
-            style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563', backgroundColor: '#ffffff', outline: 'none', cursor: 'pointer' }}
-          >
-            <option value="">All Courses</option>
-            {courses.map(c => <option key={c.id} value={c.id}>{c.code} — {c.name}</option>)}
-          </select>
+          {courses.length === 0 && documentTypes.length === 0 && semesters.length === 0 && availableStatuses.length === 0 && availableExtractions.length === 0 ? (
+            <span style={{ fontSize: '0.875rem', color: '#6b7280', fontStyle: 'italic' }}>
+              No filter options available yet.
+            </span>
+          ) : (
+            <>
+              {/* Course Filter */}
+              <select 
+                value={selectedCourse} 
+                onChange={(e) => { setSelectedCourse(e.target.value); setPage(1); }}
+                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563', backgroundColor: '#ffffff', outline: 'none', cursor: 'pointer' }}
+              >
+                <option value="">All Courses</option>
+                {courses.map(c => <option key={c.id} value={c.id}>{c.code} — {c.name}</option>)}
+              </select>
 
-          {/* Document Type Filter */}
-          <select 
-            value={selectedType} 
-            onChange={(e) => { setSelectedType(e.target.value); setPage(1); }}
-            style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563', backgroundColor: '#ffffff', outline: 'none', cursor: 'pointer' }}
-          >
-            <option value="">All Types</option>
-            {documentTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-          </select>
+              {/* Document Type Filter */}
+              <select 
+                value={selectedType} 
+                onChange={(e) => { setSelectedType(e.target.value); setPage(1); }}
+                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563', backgroundColor: '#ffffff', outline: 'none', cursor: 'pointer' }}
+              >
+                <option value="">All Types</option>
+                {documentTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
 
-          {/* Semester Filter */}
-          <select 
-            value={selectedSemester} 
-            onChange={(e) => { setSelectedSemester(e.target.value); setPage(1); }}
-            style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563', backgroundColor: '#ffffff', outline: 'none', cursor: 'pointer' }}
-          >
-            <option value="">All Semesters</option>
-            {semesters.map(s => (
-              <option key={s.id} value={s.id}>
-                {s.label} ({s.academic_year?.label || 'N/A'})
-              </option>
-            ))}
-          </select>
+              {/* Semester Filter */}
+              <select 
+                value={selectedSemester} 
+                onChange={(e) => { setSelectedSemester(e.target.value); setPage(1); }}
+                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563', backgroundColor: '#ffffff', outline: 'none', cursor: 'pointer' }}
+              >
+                <option value="">All Semesters</option>
+                {semesters.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.label} ({s.academic_year?.label || 'N/A'})
+                  </option>
+                ))}
+              </select>
 
-          {/* Extraction Method Filter */}
-          <select 
-            value={selectedExtraction} 
-            onChange={(e) => { setSelectedExtraction(e.target.value); setPage(1); }}
-            style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563', backgroundColor: '#ffffff', outline: 'none', cursor: 'pointer' }}
-          >
-            <option value="">All Extraction</option>
-            <option value="Digital">Digital PDF (PyMuPDF)</option>
-            <option value="Tesseract OCR">Scanned (Tesseract)</option>
-          </select>
+              {/* Extraction Method Filter */}
+              <select 
+                value={selectedExtraction} 
+                onChange={(e) => { setSelectedExtraction(e.target.value); setPage(1); }}
+                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563', backgroundColor: '#ffffff', outline: 'none', cursor: 'pointer' }}
+              >
+                <option value="">All Extraction</option>
+                {availableExtractions.map(method => (
+                  <option key={method} value={method}>{getExtractionLabel(method)}</option>
+                ))}
+              </select>
 
-          {/* Status Filter (Admins/Moderators only) */}
-          {(user?.role === 'administrator' || user?.role === 'moderator') && (
-            <select 
-              value={selectedStatus} 
-              onChange={(e) => { setSelectedStatus(e.target.value); setPage(1); }}
-              style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563', backgroundColor: '#ffffff', outline: 'none', cursor: 'pointer' }}
-            >
-              <option value="">All Status</option>
-              <option value="processed">Processed</option>
-              <option value="pending">Pending</option>
-              <option value="failed">Failed</option>
-            </select>
+              {/* Status Filter (Admins/Moderators only) */}
+              {(user?.role === 'administrator' || user?.role === 'moderator') && (
+                <select 
+                  value={selectedStatus} 
+                  onChange={(e) => { setSelectedStatus(e.target.value); setPage(1); }}
+                  style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563', backgroundColor: '#ffffff', outline: 'none', cursor: 'pointer' }}
+                >
+                  <option value="">All Status</option>
+                  {availableStatuses.map(status => (
+                    <option key={status} value={status}>{getStatusLabel(status)}</option>
+                  ))}
+                </select>
+              )}
+            </>
           )}
 
           {/* Reset Filters Link */}

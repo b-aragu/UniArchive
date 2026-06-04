@@ -2,14 +2,14 @@
 
 **Project Name:** UniArchive: Intelligent Academic Document Retrieval System with OCR and Semantic Search  
 **Author:** Final Year Project Team  
-**Date:** June 3, 2026  
+**Date:** June 4, 2026  
 **Status:** Complete (MVP Polished & Demo-Ready)
 
 ---
 
 ## 1. Executive Summary
 
-This report provides a high-level overview of the current status of the **UniArchive** project. As of June 3, 2026, the foundational phases (Phase 1 through Phase 5) have been successfully executed, transitioning the codebase from a minimal 12% skeletal state to a structurally complete academic document repository engine (~35% overall completion). The architecture, database, user authentication (RBAC), and basic search endpoints are now fully operational, tested, and version-controlled.
+This report provides a high-level overview of the current status of the **UniArchive** project. As of June 4, 2026, the dynamic filtering system was completed, transitioning the front-end page search filters from hardcoded configuration to a dynamic metadata engine loaded directly from the database schema endpoints. The architecture, database, user authentication (RBAC), search index, and dynamic metadata filters are now fully operational, tested, and version-controlled.
 
 ---
 
@@ -30,6 +30,7 @@ This report provides a high-level overview of the current status of the **UniArc
 | **Phase 9** | Duplicate Detection (pHash & Text Similarity) | 5% | ✅ Complete | June 3, 2026 |
 | **Phase 10**| Frontend Implementation (React/TS/Vite) | 15% | ✅ Complete | July 05, 2026 |
 | **Phase 11**| Final Testing, Demo Prep & Deployment | 15% | ✅ E2E Complete | July 15, 2026 |
+| **Phase 12**| Dynamic Filtering & Live Metadata | 5% | ✅ Complete | June 4, 2026 |
 
 ---
 
@@ -45,6 +46,7 @@ This report provides a high-level overview of the current status of the **UniArc
 9. **Hybrid Search (RRF):** Integrated FTS and Semantic Search using Reciprocal Rank Fusion (RRF), deploying a production-ready `/api/search/hybrid` endpoint with structured query logging.
 10. **Duplicate Detection:** Integrated perceptual hashing (`pHash`) and Jaccard text similarity to intercept uploads and flag near-duplicates securely without blocking user interactions.
 11. **E2E Integration Verified:** Successfully executed the Phase 11 full pipeline tests. The backend and frontend are entirely stable and interoperable. The passlib bcrypt crash bug was isolated and repaired.
+12. **Dynamic Metadata Filtering:** Replaced hardcoded document filter dropdown selections on the frontend with dynamically loaded backend options (`GET /api/documents/filter-options`), incorporating dynamic fallback labels and empty state handling.
 
 ---
 
@@ -62,6 +64,7 @@ No technical blockers are currently delaying the project. The following risks ar
 1. **Milestone 3 (June 10, 2026):** Complete Phase 6 OCR Preprocessing. ✅ (Validation Pass Completed: 100% Success Rate across 9 document topologies).
 2. **Milestone 4 (June 15, 2026):** Implement SBERT and FAISS indexing, marking the completion of semantic vector capability. ✅ (Validation Pass Completed: Pipeline successfully tested on CPU).
 3. **Milestone 5 (June 18, 2026):** Execute RRF logic merging keyword search and semantic vector search into hybrid retrieval. ✅ (Validation Pass Completed: RRF Search endpoint successfully ranking results).
+4. **Milestone 6 (June 20, 2026):** Transition hardcoded page filtering parameters to live metadata lookups. ✅ (Completed: Front-end page filters verified dynamically loading from db).
 
 ---
 
@@ -90,6 +93,7 @@ No technical blockers are currently delaying the project. The following risks ar
 *   [`18_Phase_9_Duplicate_Detection_Report.md`](./18_Phase_9_Duplicate_Detection_Report.md)
 *   [`19_End_To_End_MVP_Verification_Report.md`](./19_End_To_End_MVP_Verification_Report.md)
 *   [`20_Final_UI_Functionality_Polish_Report.md`](./20_Final_UI_Functionality_Polish_Report.md)
+*   [`26_Dynamic_Documents_Filters_Report.md`](./26_Dynamic_Documents_Filters_Report.md)
 
 ### Final Report & Demo
 *   [`../final-report/Chapter1_Introduction.md`](../final-report/Chapter1_Introduction.md)

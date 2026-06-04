@@ -14,7 +14,7 @@ from app.db.database import get_db
 from app.models.user import User
 from app.models.document import Document
 from app.models import Course, DocumentType, Semester, DuplicatePair
-from app.schemas.document import DocumentOut, DocumentDetail, PaginatedDocuments, SearchResult, SemanticSearchResult, HybridSearchResult, RejectRequest
+from app.schemas.document import DocumentOut, DocumentDetail, PaginatedDocuments, SearchResult, SemanticSearchResult, HybridSearchResult, RejectRequest, FilterOptionsOut
 from app.schemas.hierarchy import CourseOut, DocumentTypeOut, SemesterDetail
 from app.services.ocr_service import extract_text_from_file
 from app.services.search_service import search_documents
@@ -99,6 +99,21 @@ def list_documents(
         "page": (skip // limit) + 1,
         "page_size": limit,
         "total_pages": (total + limit - 1) // limit if total > 0 else 1
+    }
+
+@router.get("/documents/filter-options", response_model=FilterOptionsOut)
+def get_filter_options(db: Session = Depends(get_db)):
+    statuses = [
+        r[0] for r in db.query(Document.status).distinct().all()
+        if r[0] is not None and r[0] != ""
+    ]
+    extraction_methods = [
+        r[0] for r in db.query(Document.extraction_method).distinct().all()
+        if r[0] is not None and r[0] != ""
+    ]
+    return {
+        "statuses": sorted(statuses),
+        "extraction_methods": sorted(extraction_methods)
     }
 
 @router.post("/upload", response_model=DocumentOut)
