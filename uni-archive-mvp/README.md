@@ -56,24 +56,21 @@ UniArchive is an intelligent, scalable academic document repository. It features
 
 ---
 
-## 🚀 Setup & Running the Project (Recommended - venv)
+## 🚀 Setup & Running the Project (venv)
 
 The project is run locally using a Python virtual environment (`venv`) for the backend and Node/npm for the frontend.
 
 ### Prerequisites
 * **Python 3.9+** (with `venv` and `pip`)
 * **Node.js 18+** (with `npm`)
-* **PostgreSQL** (either installed locally, or run via Docker Compose)
+* **PostgreSQL** (installed locally)
 * **Tesseract OCR** (for image text extraction, e.g. `sudo apt-get install tesseract-ocr libgl1`)
 
 ---
 
 ### 1. Database Setup
-If you don't have a local PostgreSQL instance running, you can start the pre-configured database container using Docker:
-```bash
-docker-compose up -d db
-```
-This starts PostgreSQL on port `5433` as defined in `docker-compose.yml`.
+Ensure you have a local PostgreSQL instance running and create a database named `uniarchive` (default values match the `DATABASE_URL` in `.env.example`).
+
 
 ---
 
@@ -141,6 +138,5 @@ To evaluate the system, use the following pre-seeded credentials:
 
 ## 🔧 Troubleshooting
 
-* **Port 5432 Conflicts:** The local `docker-compose.yml` maps PostgreSQL to port `5433` on the host to avoid conflicts. Ensure `DATABASE_URL` in your `.env` reflects this if running the backend locally (`localhost:5433`).
 * **Model Download Delays:** On the first execution of semantic search or upload pipelines, `sentence-transformers` will download the `all-MiniLM-L6-v2` model (~90MB). This may cause the first request to be slow.
 * **Tesseract Not Found:** If running the backend locally, install `tesseract-ocr` and `libgl1` on your host operating system (e.g., `sudo apt-get install tesseract-ocr libgl1`).
