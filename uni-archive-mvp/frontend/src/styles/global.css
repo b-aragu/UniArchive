@@ -126,3 +126,14 @@ button:disabled {
   margin-top: 16px;
   font-weight: 700;
 }
+
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

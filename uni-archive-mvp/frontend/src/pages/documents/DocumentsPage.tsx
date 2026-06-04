@@ -8,6 +8,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { StatusBadge } from '../../components/StatusBadge';
+import { SearchableSelect } from '../../components/SearchableSelect';
 
 export const DocumentsPage: React.FC = () => {
   const { user } = useAuth();
@@ -288,63 +289,50 @@ export const DocumentsPage: React.FC = () => {
           ) : (
             <>
               {/* Course Filter */}
-              <select 
-                value={selectedCourse} 
-                onChange={(e) => { setSelectedCourse(e.target.value); setPage(1); }}
-                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563', backgroundColor: '#ffffff', outline: 'none', cursor: 'pointer' }}
-              >
-                <option value="">All Courses</option>
-                {courses.map(c => <option key={c.id} value={c.id}>{c.code} — {c.name}</option>)}
-              </select>
+              <SearchableSelect
+                options={courses.map(c => ({ value: c.id, label: `${c.code} — ${c.name}` }))}
+                value={selectedCourse}
+                onChange={(v) => { setSelectedCourse(v); setPage(1); }}
+                placeholder="All Courses"
+                allLabel="All Courses"
+              />
 
               {/* Document Type Filter */}
-              <select 
-                value={selectedType} 
-                onChange={(e) => { setSelectedType(e.target.value); setPage(1); }}
-                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563', backgroundColor: '#ffffff', outline: 'none', cursor: 'pointer' }}
-              >
-                <option value="">All Types</option>
-                {documentTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-              </select>
+              <SearchableSelect
+                options={documentTypes.map(t => ({ value: t.id, label: t.name }))}
+                value={selectedType}
+                onChange={(v) => { setSelectedType(v); setPage(1); }}
+                placeholder="All Types"
+                allLabel="All Types"
+              />
 
               {/* Semester Filter */}
-              <select 
-                value={selectedSemester} 
-                onChange={(e) => { setSelectedSemester(e.target.value); setPage(1); }}
-                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563', backgroundColor: '#ffffff', outline: 'none', cursor: 'pointer' }}
-              >
-                <option value="">All Semesters</option>
-                {semesters.map(s => (
-                  <option key={s.id} value={s.id}>
-                    {s.label} ({s.academic_year?.label || 'N/A'})
-                  </option>
-                ))}
-              </select>
+              <SearchableSelect
+                options={semesters.map(s => ({ value: s.id, label: `${s.label} (${s.academic_year?.label || 'N/A'})` }))}
+                value={selectedSemester}
+                onChange={(v) => { setSelectedSemester(v); setPage(1); }}
+                placeholder="All Semesters"
+                allLabel="All Semesters"
+              />
 
               {/* Extraction Method Filter */}
-              <select 
-                value={selectedExtraction} 
-                onChange={(e) => { setSelectedExtraction(e.target.value); setPage(1); }}
-                style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563', backgroundColor: '#ffffff', outline: 'none', cursor: 'pointer' }}
-              >
-                <option value="">All Extraction</option>
-                {availableExtractions.map(method => (
-                  <option key={method} value={method}>{getExtractionLabel(method)}</option>
-                ))}
-              </select>
+              <SearchableSelect
+                options={availableExtractions.map(method => ({ value: method, label: getExtractionLabel(method) }))}
+                value={selectedExtraction}
+                onChange={(v) => { setSelectedExtraction(v); setPage(1); }}
+                placeholder="All Extraction"
+                allLabel="All Extraction Methods"
+              />
 
               {/* Status Filter (Admins/Moderators only) */}
               {(user?.role === 'administrator' || user?.role === 'moderator') && (
-                <select 
-                  value={selectedStatus} 
-                  onChange={(e) => { setSelectedStatus(e.target.value); setPage(1); }}
-                  style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '0.875rem', color: '#4b5563', backgroundColor: '#ffffff', outline: 'none', cursor: 'pointer' }}
-                >
-                  <option value="">All Status</option>
-                  {availableStatuses.map(status => (
-                    <option key={status} value={status}>{getStatusLabel(status)}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  options={availableStatuses.map(status => ({ value: status, label: getStatusLabel(status) }))}
+                  value={selectedStatus}
+                  onChange={(v) => { setSelectedStatus(v); setPage(1); }}
+                  placeholder="All Status"
+                  allLabel="All Statuses"
+                />
               )}
             </>
           )}
