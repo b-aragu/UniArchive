@@ -101,3 +101,31 @@ def require_role(allowed_roles: list[str]):
             )
         return current_user
     return role_checker
+
+
+from typing import Optional
+
+# Optional OAuth2 Password Bearer for endpoints that can be browsed publicly or by authenticated users
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
+
+async def get_current_user_optional(
+    db: Session = Depends(get_db), 
+    token: Optional[str] = Depends(oauth2_scheme_optional)
+) -> Optional[User]:
+    """Dependency to extract and validate the current user from JWT, returning None if not found or invalid."""
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+        user_id: str = payload.get("sub")
+        token_type: str = payload.get("type")
+        
+        if user_id is None or token_type != "access":
+            return None
+            
+        user = db.query(User).filter(User.id == UUID(user_id)).first()
+        if user and user.is_active:
+            return user
+    except Exception:
+        pass
+    return None

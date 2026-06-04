@@ -49,6 +49,7 @@ class DocumentOut(BaseModel):
     phash: str | None = None
     status: str
     is_approved: bool
+    rejection_reason: str | None = None
     created_at: datetime
     updated_at: datetime
     duplicate_warning: list[dict] | None = None
@@ -114,3 +115,7 @@ class DuplicatePairOut(BaseModel):
     
     document_a_title: str | None = None
     document_b_title: str | None = None
+
+
+class RejectRequest(BaseModel):
+    rejection_reason: str

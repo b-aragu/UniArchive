@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { apiClient } from '../../api/client';
-import { Download, FileText, Calendar, Shield, ArrowLeft, Cpu, Award, BookOpen, Clock } from 'lucide-react';
+import { Download, FileText, Calendar, Shield, ArrowLeft, Cpu, Award, BookOpen, Clock, AlertCircle } from 'lucide-react';
+import { StatusBadge } from '../../components/StatusBadge';
 
 export const DocumentDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -114,14 +115,35 @@ export const DocumentDetailPage: React.FC = () => {
       </Link>
 
       <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.025)', border: '1px solid #f3f4f6' }}>
+        
+        {/* Rejection Feedback Alert Banner */}
+        {doc.status === 'rejected' && doc.rejection_reason && (
+          <div style={{
+            padding: '16px 20px',
+            backgroundColor: '#fef2f2',
+            border: '1px solid #fecaca',
+            borderRadius: '8px',
+            color: '#991b1b',
+            marginBottom: '24px',
+            fontSize: '0.9375rem',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '12px'
+          }}>
+            <AlertCircle size={20} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <strong style={{ fontWeight: '700', display: 'block', marginBottom: '4px' }}>Submission Rejected</strong>
+              <span>Feedback: {doc.rejection_reason}</span>
+            </div>
+          </div>
+        )}
+
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
           <div>
             <h2 style={{ margin: '0 0 12px 0', fontSize: '1.75rem', fontWeight: '700', color: '#111827', letterSpacing: '-0.025em', lineHeight: '1.2' }}>{doc.title}</h2>
-            <div style={{ display: 'flex', gap: '16px', color: '#6b7280', fontSize: '0.875rem', fontWeight: '500' }}>
+            <div style={{ display: 'flex', gap: '16px', color: '#6b7280', fontSize: '0.875rem', fontWeight: '500', alignItems: 'center' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={16} strokeWidth={2} /> {new Date(doc.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: doc.is_approved ? '#059669' : '#d97706', backgroundColor: doc.is_approved ? '#ecfdf5' : '#fffbeb', padding: '2px 8px', borderRadius: '12px' }}>
-                <Shield size={16} strokeWidth={2} /> {doc.is_approved ? 'Verified' : 'Pending Review'}
-              </span>
+              <StatusBadge status={doc.status} is_approved={doc.is_approved} />
             </div>
           </div>
           <button 

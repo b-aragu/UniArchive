@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { StatusBadge } from '../../components/StatusBadge';
 
 export const DocumentsPage: React.FC = () => {
   const { user } = useAuth();
@@ -35,6 +36,7 @@ export const DocumentsPage: React.FC = () => {
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'library' | 'my_uploads'>('library');
 
   // Load all lookup data for filters
   useEffect(() => {
@@ -59,6 +61,7 @@ export const DocumentsPage: React.FC = () => {
   const fetchDocuments = useCallback(async () => {
     setLoading(true);
     setError('');
+    const isStudent = user?.role === 'student';
     try {
       const response = await apiClient.get('/api/documents', {
         params: {
@@ -67,10 +70,11 @@ export const DocumentsPage: React.FC = () => {
           course_id: selectedCourse || undefined,
           document_type_id: selectedType || undefined,
           semester_id: selectedSemester || undefined,
-          status: selectedStatus || undefined,
+          status: isStudent && activeTab === 'library' ? 'approved' : (selectedStatus || undefined),
           title: searchTitle.trim() || undefined,
           extraction_method: selectedExtraction || undefined,
-          sort_by: sortBy
+          sort_by: sortBy,
+          uploaded_by_me: isStudent && activeTab === 'my_uploads' ? true : undefined
         }
       });
       setDocuments(response.data.items || []);
@@ -81,7 +85,7 @@ export const DocumentsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, selectedCourse, selectedType, selectedSemester, selectedStatus, searchTitle, selectedExtraction, sortBy]);
+  }, [page, limit, selectedCourse, selectedType, selectedSemester, selectedStatus, searchTitle, selectedExtraction, sortBy, activeTab, user]);
 
   // Debounced execution of fetchDocuments for text input search
   useEffect(() => {
@@ -136,6 +140,46 @@ export const DocumentsPage: React.FC = () => {
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '40px' }}>
       
+      {/* Role-specific Tab Selector for Students */}
+      {user?.role === 'student' && (
+        <div style={{ display: 'flex', borderBottom: '2px solid #e5e7eb', marginBottom: '24px', gap: '8px' }}>
+          <button
+            onClick={() => { setActiveTab('library'); setPage(1); }}
+            style={{
+              padding: '12px 24px',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderBottom: activeTab === 'library' ? '3px solid #2563eb' : '3px solid transparent',
+              color: activeTab === 'library' ? '#2563eb' : '#4b5563',
+              fontWeight: '600',
+              fontSize: '1rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              marginBottom: '-2px'
+            }}
+          >
+            Global Library
+          </button>
+          <button
+            onClick={() => { setActiveTab('my_uploads'); setPage(1); }}
+            style={{
+              padding: '12px 24px',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderBottom: activeTab === 'my_uploads' ? '3px solid #2563eb' : '3px solid transparent',
+              color: activeTab === 'my_uploads' ? '#2563eb' : '#4b5563',
+              fontWeight: '600',
+              fontSize: '1rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              marginBottom: '-2px'
+            }}
+          >
+            My Uploads
+          </button>
+        </div>
+      )}
+
       {/* Top Controls Bar */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', border: '1px solid #f3f4f6', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', marginBottom: '24px' }}>
         
@@ -335,13 +379,7 @@ export const DocumentsPage: React.FC = () => {
                 <div>
                   {/* Card Header Status Row */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                    <span style={{ 
-                      backgroundColor: doc.is_approved ? '#ecfdf5' : '#fffbeb', 
-                      color: doc.is_approved ? '#059669' : '#d97706',
-                      padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600'
-                    }}>
-                      {doc.is_approved ? 'Verified' : 'Pending Review'}
-                    </span>
+                    <StatusBadge status={doc.status} is_approved={doc.is_approved} />
                     
                     {/* OCR Badge */}
                     {doc.ocr_confidence !== null && doc.ocr_confidence !== undefined && (
@@ -465,13 +503,7 @@ export const DocumentsPage: React.FC = () => {
                       </td>
                       <td style={{ padding: '16px 20px', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                          <span style={{ 
-                            backgroundColor: doc.is_approved ? '#ecfdf5' : '#fffbeb', 
-                            color: doc.is_approved ? '#059669' : '#d97706',
-                            padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600'
-                          }}>
-                            {doc.is_approved ? 'Verified' : 'Pending'}
-                          </span>
+                          <StatusBadge status={doc.status} is_approved={doc.is_approved} />
                           {hasDuplicates && (
                             <span style={{ backgroundColor: '#fef2f2', color: '#b91c1c', padding: '2px 6px', borderRadius: '4px', fontSize: '0.6875rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '3px' }}>
                               <AlertCircle size={10} /> Duplicate Flag

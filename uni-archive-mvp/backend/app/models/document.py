@@ -90,6 +90,7 @@ class Document(Base):
         index=True,
     )
     is_approved = Column(Boolean, default=False, nullable=False, index=True)
+    rejection_reason = Column(String(255), nullable=True)
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

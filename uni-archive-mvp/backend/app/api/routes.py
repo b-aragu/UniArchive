@@ -9,12 +9,12 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.security import get_current_user, require_role
+from app.core.security import get_current_user, require_role, get_current_user_optional
 from app.db.database import get_db
 from app.models.user import User
 from app.models.document import Document
-from app.models import Course, DocumentType, Semester
-from app.schemas.document import DocumentOut, DocumentDetail, PaginatedDocuments, SearchResult, SemanticSearchResult, HybridSearchResult
+from app.models import Course, DocumentType, Semester, DuplicatePair
+from app.schemas.document import DocumentOut, DocumentDetail, PaginatedDocuments, SearchResult, SemanticSearchResult, HybridSearchResult, RejectRequest
 from app.schemas.hierarchy import CourseOut, DocumentTypeOut, SemesterDetail
 from app.services.ocr_service import extract_text_from_file
 from app.services.search_service import search_documents
@@ -49,15 +49,16 @@ def list_documents(
     title: str | None = None,
     extraction_method: str | None = None,
     sort_by: str = Query("newest"),
+    uploaded_by_me: bool = Query(False),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     q = db.query(Document)
     
     # Role-based restriction:
-    # Students see approved documents OR their own uploads
-    # Moderators and Admins see everything
-    if current_user.role.name == "student":
+    if uploaded_by_me:
+        q = q.filter(Document.uploaded_by == current_user.id)
+    elif current_user.role.name == "student":
         q = q.filter((Document.is_approved == True) | (Document.uploaded_by == current_user.id))
     
     # Filters
@@ -136,6 +137,10 @@ async def upload_document(
     # Phase 9: Compute pHash before saving
     phash_value = compute_phash(str(file_path))
 
+    is_moderator_or_admin = current_user.role.name in ["administrator", "moderator"]
+    initial_status = "approved" if is_moderator_or_admin else "pending"
+    is_approved_val = is_moderator_or_admin
+
     doc = Document(
         title=title,
         course_id=course_id,
@@ -152,9 +157,8 @@ async def upload_document(
         page_count=page_count,
         processing_time_ms=processing_time_ms,
         phash=phash_value,
-        status="processed",
-        # Auto-approve for admins/moderators, pending for students
-        is_approved=current_user.role.name in ["administrator", "moderator"]
+        status=initial_status,
+        is_approved=is_approved_val
     )
 
     db.add(doc)
@@ -163,6 +167,10 @@ async def upload_document(
     
     # Phase 9: Duplicate Detection
     duplicates = detect_duplicates(db, doc)
+    if duplicates and not is_moderator_or_admin:
+        doc.status = "duplicate_warning"
+        db.commit()
+        db.refresh(doc)
     
     # We map doc to DocumentOut dict so we can manually inject duplicate_warning,
     # or rely on Pydantic to pick it up if we set it as an attribute.
@@ -185,9 +193,10 @@ def search(
     q: str = "",
     course_id: UUID | None = None,
     document_type_id: UUID | None = None,
+    current_user: User | None = Depends(get_current_user_optional),
     db: Session = Depends(get_db)
 ):
-    results = search_documents(db, q, course_id, document_type_id)
+    results = search_documents(db, q, course_id, document_type_id, current_user=current_user)
     output = []
     for doc, snippet, score in results:
         data = SearchResult.model_validate(doc)
@@ -203,17 +212,18 @@ def api_search_semantic(
     course_id: UUID | None = None,
     document_type_id: UUID | None = None,
     limit: int = 10,
+    current_user: User | None = Depends(get_current_user_optional),
     db: Session = Depends(get_db)
 ):
     import time
     start_time = time.time()
     
-    results = search_semantic(db, query, limit=limit, course_id=course_id, document_type_id=document_type_id)
+    results = search_semantic(db, query, limit=limit, course_id=course_id, document_type_id=document_type_id, current_user=current_user)
     
     try:
         response_time_ms = (time.time() - start_time) * 1000.0
         log_entry = SearchLog(
-            user_id=None,
+            user_id=current_user.id if current_user else None,
             query_text=query,
             search_type="semantic",
             result_count=len(results),
@@ -233,17 +243,18 @@ def api_search_hybrid(
     course_id: UUID | None = None,
     document_type_id: UUID | None = None,
     limit: int = 10,
+    current_user: User | None = Depends(get_current_user_optional),
     db: Session = Depends(get_db)
 ):
     import time
     start_time = time.time()
     
-    results = search_hybrid(db, query, limit=limit, course_id=course_id, document_type_id=document_type_id)
+    results = search_hybrid(db, query, limit=limit, course_id=course_id, document_type_id=document_type_id, current_user=current_user)
     
     try:
         response_time_ms = (time.time() - start_time) * 1000.0
         log_entry = SearchLog(
-            user_id=None,
+            user_id=current_user.id if current_user else None,
             query_text=query,
             search_type="hybrid",
             result_count=len(results),
@@ -318,6 +329,28 @@ def approve_document(
         
     doc.is_approved = True
     doc.status = "approved"
+    doc.rejection_reason = None
+    db.commit()
+    db.refresh(doc)
+    return doc
+
+@router.post("/documents/{document_id}/reject", response_model=DocumentOut)
+def reject_document(
+    document_id: UUID,
+    request: RejectRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role.name not in ["administrator", "moderator"]:
+        raise HTTPException(status_code=403, detail="Not authorized to reject documents")
+        
+    doc = db.query(Document).filter(Document.id == document_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found.")
+        
+    doc.is_approved = False
+    doc.status = "rejected"
+    doc.rejection_reason = request.rejection_reason
     db.commit()
     db.refresh(doc)
     return doc

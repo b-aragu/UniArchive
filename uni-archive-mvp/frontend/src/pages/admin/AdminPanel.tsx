@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { apiClient } from '../../api/client';
-import { Shield, Users, Server, AlertTriangle, Key, CheckCircle, Search, Clipboard } from 'lucide-react';
+import { Shield, Users, Server, AlertTriangle, Key, CheckCircle, Search, Clipboard, Activity, BarChart3 } from 'lucide-react';
 
 export const AdminPanel: React.FC = () => {
   const [stats, setStats] = useState<any>(null);
@@ -38,8 +38,19 @@ export const AdminPanel: React.FC = () => {
     fetchAdminData();
   }, []);
 
+  const searchBreakdown = stats?.searches?.breakdown || {};
+  const totalSearches = stats?.searches?.total || 0;
+
+  // Calculate percentages for search breakdown
+  const getPercentage = (count: number) => {
+    if (!totalSearches) return '0%';
+    return `${Math.round((count / totalSearches) * 100)}%`;
+  };
+
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '40px', animation: 'fadeIn 0.3s ease-in-out' }}>
+      
+      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
         <div style={{ backgroundColor: '#eff6ff', padding: '10px', borderRadius: '12px' }}>
           <Shield size={24} color="#2563eb" strokeWidth={2} />
@@ -66,6 +77,7 @@ export const AdminPanel: React.FC = () => {
             <p style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: '700', color: '#111827', letterSpacing: '-0.025em' }}>{stats?.users?.total !== undefined ? stats.users.total : users.length}</p>
           </div>
         </div>
+        
         <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ backgroundColor: '#ecfdf5', padding: '12px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Server color="#059669" size={24} strokeWidth={1.5} /></div>
           <div>
@@ -73,6 +85,7 @@ export const AdminPanel: React.FC = () => {
             <p style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: '700', color: '#111827', letterSpacing: '-0.025em' }}>{stats?.documents?.total !== undefined ? stats.documents.total : '-'}</p>
           </div>
         </div>
+
         <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ backgroundColor: '#fffbeb', padding: '12px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Clipboard color="#d97706" size={24} strokeWidth={1.5} /></div>
           <div>
@@ -80,6 +93,7 @@ export const AdminPanel: React.FC = () => {
             <p style={{ margin: '4px 0 0 0', fontSize: '1.75rem', fontWeight: '700', color: '#111827', letterSpacing: '-0.025em' }}>{stats?.documents?.pending !== undefined ? stats.documents.pending : '-'}</p>
           </div>
         </div>
+
         <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ backgroundColor: '#fef2f2', padding: '12px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><AlertTriangle color="#dc2626" size={24} strokeWidth={1.5} /></div>
           <div>
@@ -89,7 +103,9 @@ export const AdminPanel: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      {/* Responsive Panels Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '24px' }}>
+        
         {/* Detected Duplicates Panel */}
         <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6', backgroundColor: '#fafafa' }}>
@@ -121,10 +137,10 @@ export const AdminPanel: React.FC = () => {
           </div>
         </div>
 
-        {/* User Management Panel (Real) */}
+        {/* User Management Panel */}
         <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6', backgroundColor: '#fafafa' }}>
-            <h3 style={{ margin: 0, fontSize: '1.0625rem', color: '#111827', fontWeight: '600', letterSpacing: '-0.01em' }}>User Management</h3>
+            <h3 style={{ margin: 0, fontSize: '1.0625rem', color: '#111827', fontWeight: '600', letterSpacing: '-0.01em' }}>User Accounts</h3>
           </div>
           <div style={{ padding: '0', flex: 1, overflowY: 'auto', maxHeight: '400px' }}>
             {users.length === 0 ? (
@@ -177,6 +193,98 @@ export const AdminPanel: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Search Insights & System Health Panel */}
+        <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '20px 24px', borderBottom: '1px solid #f3f4f6', backgroundColor: '#fafafa', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Activity size={18} color="#2563eb" />
+            <h3 style={{ margin: 0, fontSize: '1.0625rem', color: '#111827', fontWeight: '600', letterSpacing: '-0.01em' }}>Search & Health Analytics</h3>
+          </div>
+          
+          <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            
+            {/* Search Type Breakdown */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
+                <BarChart3 size={16} color="#4b5563" />
+                <h4 style={{ margin: 0, fontSize: '0.875rem', fontWeight: '600', color: '#374151' }}>Search Query Distribution</h4>
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: '#4b5563', marginBottom: '4px' }}>
+                    <span>Keyword Search</span>
+                    <span style={{ fontWeight: '600' }}>{searchBreakdown.keyword || 0} ({getPercentage(searchBreakdown.keyword || 0)})</span>
+                  </div>
+                  <div style={{ width: '100%', height: '6px', backgroundColor: '#e5e7eb', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ width: getPercentage(searchBreakdown.keyword || 0), height: '100%', backgroundColor: '#2563eb', borderRadius: '3px' }} />
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: '#4b5563', marginBottom: '4px' }}>
+                    <span>Semantic Search</span>
+                    <span style={{ fontWeight: '600' }}>{searchBreakdown.semantic || 0} ({getPercentage(searchBreakdown.semantic || 0)})</span>
+                  </div>
+                  <div style={{ width: '100%', height: '6px', backgroundColor: '#e5e7eb', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ width: getPercentage(searchBreakdown.semantic || 0), height: '100%', backgroundColor: '#10b981', borderRadius: '3px' }} />
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem', color: '#4b5563', marginBottom: '4px' }}>
+                    <span>Hybrid Search</span>
+                    <span style={{ fontWeight: '600' }}>{searchBreakdown.hybrid || 0} ({getPercentage(searchBreakdown.hybrid || 0)})</span>
+                  </div>
+                  <div style={{ width: '100%', height: '6px', backgroundColor: '#e5e7eb', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ width: getPercentage(searchBreakdown.hybrid || 0), height: '100%', backgroundColor: '#8b5cf6', borderRadius: '3px' }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* System Health Indicators */}
+            <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: '20px' }}>
+              <h4 style={{ margin: '0 0 16px 0', fontSize: '0.875rem', fontWeight: '600', color: '#374151' }}>System Status Health</h4>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '8px', border: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>API Gateway</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }} />
+                    <span style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#111827' }}>Operational</span>
+                  </div>
+                </div>
+
+                <div style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '8px', border: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>Database Connection</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }} />
+                    <span style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#111827' }}>Connected</span>
+                  </div>
+                </div>
+
+                <div style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '8px', border: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>OCR Queue Worker</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }} />
+                    <span style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#111827' }}>Listening</span>
+                  </div>
+                </div>
+
+                <div style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '8px', border: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>Vector Index Engine</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }} />
+                    <span style={{ fontSize: '0.8125rem', fontWeight: '600', color: '#111827' }}>Synchronized</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </div>
   );

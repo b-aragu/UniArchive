@@ -9,6 +9,7 @@ from uuid import UUID
 from app.models.document import Document
 from app.models.course import Course
 from app.models.document_type import DocumentType
+from app.models.user import User
 
 
 def make_snippet(text: str | None, query: str, size: int = 220) -> str | None:
@@ -29,9 +30,16 @@ def search_documents(
     query: str, 
     course_id: UUID | None = None, 
     document_type_id: UUID | None = None,
-    limit: int = 50
+    limit: int = 50,
+    current_user: User | None = None
 ):
-    q = db.query(Document).filter(Document.is_approved == True)
+    q = db.query(Document)
+    if current_user:
+        if current_user.role.name == "student":
+            q = q.filter((Document.is_approved == True) | (Document.uploaded_by == current_user.id))
+        # Moderators & Administrators can search all documents, so no filter is applied
+    else:
+        q = q.filter(Document.is_approved == True)
 
     if query:
         # Use basic PostgreSQL FTS using plainto_tsquery on the precomputed search_vector

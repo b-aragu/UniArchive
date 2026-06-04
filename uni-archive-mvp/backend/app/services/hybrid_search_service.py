@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.services.search_service import search_documents
 from app.services.semantic_service import search_semantic
+from app.models.user import User
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,8 @@ def search_hybrid(
     query: str, 
     course_id: uuid.UUID | None = None, 
     document_type_id: uuid.UUID | None = None,
-    limit: int = 20
+    limit: int = 20,
+    current_user: User | None = None
 ):
     """
     Performs Hybrid Search by combining PostgreSQL FTS and FAISS Semantic Search
@@ -35,7 +37,8 @@ def search_hybrid(
         query=query, 
         course_id=course_id, 
         document_type_id=document_type_id, 
-        limit=keyword_pool_size
+        limit=keyword_pool_size,
+        current_user=current_user
     )
 
     # 2. Execute semantic search (FAISS)
@@ -45,7 +48,8 @@ def search_hybrid(
         query=query,
         course_id=course_id,
         document_type_id=document_type_id,
-        limit=semantic_pool_size
+        limit=semantic_pool_size,
+        current_user=current_user
     )
 
     # 3. Apply Reciprocal Rank Fusion

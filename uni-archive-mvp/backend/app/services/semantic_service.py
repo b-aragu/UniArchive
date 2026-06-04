@@ -16,6 +16,7 @@ import faiss
 
 from app.models.embedding import Embedding
 from app.models.document import Document
+from app.models.user import User
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -177,7 +178,14 @@ def process_and_store_document(db: Session, document_id: uuid.UUID, text: str) -
         return False
 
 
-def search_semantic(db: Session, query: str, limit: int = 10, course_id: uuid.UUID | None = None, document_type_id: uuid.UUID | None = None):
+def search_semantic(
+    db: Session, 
+    query: str, 
+    limit: int = 10, 
+    course_id: uuid.UUID | None = None, 
+    document_type_id: uuid.UUID | None = None,
+    current_user: User | None = None
+):
     """
     Performs semantic search using FAISS and joins with the database to return rich results.
     """
@@ -216,8 +224,13 @@ def search_semantic(db: Session, query: str, limit: int = 10, course_id: uuid.UU
         
         # We need to join Embedding with Document
         q = db.query(Embedding, Document).join(Document, Embedding.document_id == Document.id)\
-              .filter(Embedding.faiss_id.in_(valid_faiss_ids))\
-              .filter(Document.is_approved == True)
+              .filter(Embedding.faiss_id.in_(valid_faiss_ids))
+              
+        if current_user:
+            if current_user.role.name == "student":
+                q = q.filter((Document.is_approved == True) | (Document.uploaded_by == current_user.id))
+        else:
+            q = q.filter(Document.is_approved == True)
               
         if course_id:
             q = q.filter(Document.course_id == course_id)
