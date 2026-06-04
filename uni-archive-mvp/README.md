@@ -28,6 +28,8 @@ UniArchive is an intelligent, scalable academic document repository. It features
   * **Reciprocal Rank Fusion (RRF)**: Custom search algorithm blending and re-ranking keyword FTS scores and semantic cosine-similarity scores.
 * **Perceptual Hashing**:
   * **ImageHash (pHash)**: Computes perceptual image hashes to detect visually matching images/pages and prevent duplicate uploads.
+* **AI Study Assistant (Groq & Gemini)**:
+  * **HTTPX Integration**: Direct REST-based connection (no heavy SDK dependencies) providing automated document summaries, key topics, study notes, revision questions, and search explanations.
 
 ### Frontend
 * **Vite**: Modern, blazing-fast frontend build tool.
@@ -113,6 +115,18 @@ npm install
 npm run dev
 ```
 * **Frontend Application** will be available at: `http://localhost:5173`
+
+---
+
+### 4. AI Study Assistant Setup (Optional)
+To enable live AI generation, add your API keys to `backend/.env`. If keys are not configured, the assistant runs in **Demo Fallback Mode** returning mock study content.
+```env
+LLM_PROVIDER=groq                     # 'gemini' or 'groq'
+GEMINI_API_KEY=your_gemini_key_here
+GROQ_API_KEY=your_groq_key_here
+LLM_MODEL=llama-3.3-70b-versatile              # e.g., 'gemini-1.5-flash' or 'llama-3.3-70b-versatile'
+LLM_TEXT_LIMIT=10000                  # Maximum character limit for OCR text inputs
+```
 
 ---
 

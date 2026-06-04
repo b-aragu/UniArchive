@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router as documents_router
 from app.api.auth import router as auth_router
 from app.api.admin import router as admin_router
+from app.api.ai import router as ai_router
 
 # Import all models so relationships resolve (Alembic also needs this)
 import app.models  # noqa: F401
@@ -27,6 +28,7 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(admin_router, prefix="/api/admin", tags=["Administration"])
 app.include_router(documents_router, prefix="/api", tags=["Documents"])
+app.include_router(ai_router, prefix="/api/ai", tags=["AI Study Assistant"])
 
 @app.get("/health")
 def health_check():

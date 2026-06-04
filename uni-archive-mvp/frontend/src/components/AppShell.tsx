@@ -3,6 +3,8 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { BookOpen, Search, Upload, LayoutDashboard, Shield, LogOut, FileText, Library } from 'lucide-react';
 
+import { ErrorBoundary } from './ErrorBoundary';
+
 export const AppShell: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -101,7 +103,9 @@ export const AppShell: React.FC = () => {
           </h2>
         </header>
         <div style={{ flex: 1, padding: '0 32px 32px 32px', overflowY: 'auto' }}>
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </div>
       </main>
     </div>

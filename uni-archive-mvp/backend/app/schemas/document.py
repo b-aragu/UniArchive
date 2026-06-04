@@ -65,7 +65,7 @@ class DocumentDetail(DocumentOut):
     document_type: DocumentTypeOut | None = None
 
 
-class SearchResult(DocumentOut):
+class SearchResult(DocumentDetail):
     """Schema for search results with relevance scoring."""
     snippet: str | None = None
     relevance_score: float | None = None

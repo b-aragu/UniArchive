@@ -279,3 +279,41 @@ This log is an ongoing record of architectural changes, file additions, refactor
   * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
 * **Outcome:** The document filters are now dynamic, data-driven, and automatically display only real database values instead of hardcoded strings. The filter UI maps internal values (e.g. `duplicate_warning`) to readable titles (e.g. "Duplicate Warning") and behaves correctly under all role privileges.
 
+---
+
+### [2026-06-04] — Phase 13: AI Study Assistant Integration
+* **Phase:** Phase 13: AI Study Assistant Integration
+* **Action:** Implemented low-overhead REST clients via HTTPX to query Groq and Gemini models. Created `/api/ai` endpoints under `backend/app/api/ai.py` for dynamic document summaries, study revision questions, and search results explanation. Added fallbacks for demo mode when API keys are not supplied. Configured UI components on the document detail and search pages.
+* **Files Affected:**
+  * `[NEW]` `backend/app/services/ai_service.py`
+  * `[NEW]` `backend/app/api/ai.py`
+  * `[NEW]` `docs/project-progress/27_AI_Study_Assistant_Report.md`
+  * `[MODIFY]` `backend/app/core/config.py`
+  * `[MODIFY]` `backend/app/main.py`
+  * `[MODIFY]` `backend/.env.example`
+  * `[MODIFY]` `backend/.env`
+  * `[MODIFY]` `frontend/src/pages/documents/DocumentDetailPage.tsx`
+  * `[MODIFY]` `frontend/src/pages/search/SearchPage.tsx`
+  * `[MODIFY]` `docs/project-progress/01_Project_Status_Report.md`
+  * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
+  * `[MODIFY]` `README.md`
+  * `[MODIFY]` `uni-archive-mvp/README.md`
+* **Outcome:** The AI Study Assistant is fully operational. Summary generation, revision questions, and relevance explanation cards are integrated on the frontend, featuring fallback demo notices when API credentials are absent. Build checks and browser tests passed successfully.
+
+---
+
+### [2026-06-04] — MVP Stability, Synchronization & UI Polish Pass
+* **Phase:** Phase 14: Stability & Sync Pass
+* **Action:** Resolved document visibility mismatches for students on the Documents Page Library tab by checking `is_approved == True` on the status filter. Normalized `q` and `query` parameters on semantic/hybrid search APIs to prevent 422 validation errors. Fixed course and document type rendering inconsistencies in search results. Implemented a global React `ErrorBoundary` layout wrapper around the main Router outlet.
+* **Files Affected:**
+  * `[NEW]` `frontend/src/components/ErrorBoundary.tsx`
+  * `[NEW]` `docs/project-progress/28_Final_Stability_Sync_UI_Report.md`
+  * `[MODIFY]` `backend/app/api/routes.py`
+  * `[MODIFY]` `backend/app/schemas/document.py`
+  * `[MODIFY]` `frontend/src/components/AppShell.tsx`
+  * `[MODIFY]` `frontend/src/pages/search/SearchPage.tsx`
+  * `[MODIFY]` `docs/project-progress/08_Implementation_Log.md`
+* **Outcome:** The entire application dashboard counts are fully synchronized with the global document list. Search query execution across all modes (Keyword, Semantic, Hybrid) is stable. The page layout is guarded against rendering failures via localized boundary catchers. The MVP build passes with zero compilation errors, and integration test suites complete successfully.
+
+
+

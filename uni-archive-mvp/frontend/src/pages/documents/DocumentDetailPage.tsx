@@ -13,6 +13,43 @@ export const DocumentDetailPage: React.FC = () => {
   // Tab State
   const [activeTab, setActiveTab] = useState<'original' | 'ocr'>('original');
 
+  // AI Assistant States
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
+  const [aiSummary, setAiSummary] = useState<any>(null);
+  const [aiQuestions, setAiQuestions] = useState<any>(null);
+  const [activeAiTab, setActiveAiTab] = useState<'summary' | 'questions' | null>(null);
+  const [showAnswerIdx, setShowAnswerIdx] = useState<{ [key: number]: boolean }>({});
+
+  const handleGenerateSummary = async () => {
+    setAiLoading(true);
+    setAiError('');
+    setActiveAiTab('summary');
+    try {
+      const res = await apiClient.post(`/api/ai/documents/${id}/summary`);
+      setAiSummary(res.data);
+    } catch (err: any) {
+      setAiError(err.response?.data?.detail || 'Failed to generate summary.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleGenerateQuestions = async () => {
+    setAiLoading(true);
+    setAiError('');
+    setActiveAiTab('questions');
+    try {
+      const res = await apiClient.post(`/api/ai/documents/${id}/questions`);
+      setAiQuestions(res.data);
+      setShowAnswerIdx({});
+    } catch (err: any) {
+      setAiError(err.response?.data?.detail || 'Failed to generate revision questions.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   // Preview URL States
   const [previewUrl, setPreviewUrl] = useState('');
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -305,6 +342,180 @@ export const DocumentDetailPage: React.FC = () => {
             </div>
           </div>
         )}
+
+        <hr style={{ margin: '40px 0', border: 'none', borderTop: '1px solid #e5e7eb' }} />
+
+        {/* AI Study Assistant Section */}
+        <div>
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+            <div style={{ backgroundColor: '#eff6ff', padding: '8px', borderRadius: '8px', color: '#2563eb' }}>
+              <Cpu size={24} />
+            </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: '#111827' }}>AI Study Assistant</h3>
+              <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>Summarize documents or generate practice questions to aid revision.</p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+            <button
+              onClick={handleGenerateSummary}
+              disabled={aiLoading}
+              style={{
+                backgroundColor: activeAiTab === 'summary' && aiSummary ? '#2563eb' : '#ffffff',
+                color: activeAiTab === 'summary' && aiSummary ? '#ffffff' : '#374151',
+                border: '1px solid #d1d5db',
+                padding: '10px 16px',
+                borderRadius: '8px',
+                fontWeight: '600',
+                fontSize: '0.875rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              Generate Summary
+            </button>
+            <button
+              onClick={handleGenerateQuestions}
+              disabled={aiLoading}
+              style={{
+                backgroundColor: activeAiTab === 'questions' && aiQuestions ? '#2563eb' : '#ffffff',
+                color: activeAiTab === 'questions' && aiQuestions ? '#ffffff' : '#374151',
+                border: '1px solid #d1d5db',
+                padding: '10px 16px',
+                borderRadius: '8px',
+                fontWeight: '600',
+                fontSize: '0.875rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              Generate Revision Questions
+            </button>
+          </div>
+
+          {aiLoading && (
+            <div style={{ padding: '32px', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '24px' }}>
+              <div style={{ display: 'inline-block', width: '24px', height: '24px', border: '3px solid #e2e8f0', borderTopColor: '#2563eb', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '12px' }}></div>
+              <p style={{ margin: 0, fontSize: '0.875rem', color: '#64748b' }}>AI is analyzing this document... please wait</p>
+            </div>
+          )}
+
+          {aiError && (
+            <div style={{ padding: '16px 20px', backgroundColor: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '8px', color: '#991b1b', marginBottom: '24px', fontSize: '0.875rem' }}>
+              {aiError}
+            </div>
+          )}
+
+          {/* Render Summary Results */}
+          {!aiLoading && activeAiTab === 'summary' && aiSummary && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {aiSummary.demo_mode && (
+                <div style={{ padding: '12px 16px', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', color: '#b45309', fontSize: '0.875rem', fontWeight: '500' }}>
+                  ⚠️ AI assistant is running in demo mode. Add an API key for live generation.
+                </div>
+              )}
+              
+              <div style={{ backgroundColor: '#f8fafc', padding: '24px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', fontWeight: '600', color: '#1e293b' }}>Summary</h4>
+                <p style={{ margin: 0, fontSize: '0.9375rem', color: '#334155', lineHeight: '1.6' }}>{aiSummary.summary}</p>
+              </div>
+
+              {aiSummary.key_topics && aiSummary.key_topics.length > 0 && (
+                <div>
+                  <h4 style={{ margin: '0 0 10px 0', fontSize: '0.875rem', fontWeight: '600', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Key Topics</h4>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {aiSummary.key_topics.map((t: string, idx: number) => (
+                      <span key={idx} style={{ backgroundColor: '#eff6ff', color: '#2563eb', padding: '6px 12px', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: '600' }}>
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {aiSummary.study_notes && aiSummary.study_notes.length > 0 && (
+                <div style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <h4 style={{ margin: '0 0 12px 0', fontSize: '1rem', fontWeight: '600', color: '#1e293b' }}>Study Notes</h4>
+                  <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {aiSummary.study_notes.map((note: string, idx: number) => (
+                      <li key={idx} style={{ fontSize: '0.9375rem', color: '#334155', lineHeight: '1.5' }}>{note}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Render Practice Questions Results */}
+          {!aiLoading && activeAiTab === 'questions' && aiQuestions && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {aiQuestions.demo_mode && (
+                <div style={{ padding: '12px 16px', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', color: '#b45309', fontSize: '0.875rem', fontWeight: '500' }}>
+                  ⚠️ AI assistant is running in demo mode. Add an API key for live generation.
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '600', color: '#1e293b' }}>Revision Questions</h4>
+                {aiQuestions.difficulty && (
+                  <span style={{ backgroundColor: '#f0fdf4', color: '#15803d', padding: '4px 10px', borderRadius: '6px', fontSize: '0.8125rem', fontWeight: '600', border: '1px solid #bbf7d0' }}>
+                    Difficulty: {aiQuestions.difficulty}
+                  </span>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {aiQuestions.questions?.map((q: string, idx: number) => (
+                  <div key={idx} style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                    <p style={{ margin: '0 0 12px 0', fontSize: '0.9375rem', fontWeight: '600', color: '#1e293b' }}>
+                      {idx + 1}. {q}
+                    </p>
+                    {aiQuestions.answers && aiQuestions.answers[idx] && (
+                      <div>
+                        <button
+                          onClick={() => setShowAnswerIdx(prev => ({ ...prev, [idx]: !prev[idx] }))}
+                          style={{
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            color: '#2563eb',
+                            fontSize: '0.875rem',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            padding: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          {showAnswerIdx[idx] ? 'Hide Answer' : 'Show Answer'}
+                        </button>
+                        {showAnswerIdx[idx] && (
+                          <div style={{ marginTop: '12px', padding: '12px 16px', backgroundColor: '#ffffff', borderRadius: '6px', border: '1px solid #e2e8f0', fontSize: '0.9375rem', color: '#334155', lineHeight: '1.5' }}>
+                            {aiQuestions.answers[idx]}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

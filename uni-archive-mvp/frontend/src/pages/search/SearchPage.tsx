@@ -28,12 +28,37 @@ export const SearchPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // AI Search Explanation States
+  const [explainLoading, setExplainLoading] = useState(false);
+  const [explainError, setExplainError] = useState('');
+  const [explanation, setExplanation] = useState<any>(null);
+
+  const handleExplainSearch = async () => {
+    if (!query.trim() || results.length === 0) return;
+    setExplainLoading(true);
+    setExplainError('');
+    try {
+      const resultIds = results.map(item => item.id || item.document_id);
+      const response = await apiClient.post('/api/ai/search/explain', {
+        query: query,
+        result_ids: resultIds
+      });
+      setExplanation(response.data);
+    } catch (err: any) {
+      setExplainError(err.response?.data?.detail || 'Failed to explain search results.');
+    } finally {
+      setExplainLoading(false);
+    }
+  };
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
 
     setLoading(true);
     setError('');
+    setExplanation(null);
+    setExplainError('');
     
     try {
       let endpoint = '/api/search';
@@ -133,9 +158,106 @@ export const SearchPage: React.FC = () => {
 
       {!loading && !error && results.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '8px', fontWeight: '500' }}>
-            Found {results.length} results
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <div style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: '500' }}>
+              Found {results.length} results
+            </div>
+            <button
+              onClick={handleExplainSearch}
+              disabled={explainLoading}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                backgroundColor: '#eff6ff',
+                color: '#2563eb',
+                border: '1px solid #bfdbfe',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                cursor: (explainLoading) ? 'not-allowed' : 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              Explain Results
+            </button>
           </div>
+
+          {explainLoading && (
+            <div style={{ padding: '24px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', textAlign: 'center' }}>
+              <div style={{ display: 'inline-block', width: '20px', height: '20px', border: '3px solid #e2e8f0', borderTopColor: '#2563eb', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '8px' }}></div>
+              <p style={{ margin: 0, fontSize: '0.875rem', color: '#64748b' }}>Analyzing search relevance...</p>
+            </div>
+          )}
+
+          {explainError && (
+            <div style={{ padding: '16px 20px', backgroundColor: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '8px', color: '#991b1b', fontSize: '0.875rem' }}>
+              {explainError}
+            </div>
+          )}
+
+          {explanation && (
+            <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <style>{`
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+              `}</style>
+              
+              {explanation.demo_mode && (
+                <div style={{ padding: '10px 14px', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', color: '#b45309', fontSize: '0.8125rem', fontWeight: '500' }}>
+                  ⚠️ AI assistant is running in demo mode. Add an API key for live generation.
+                </div>
+              )}
+              
+              <div>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '0.9375rem', fontWeight: '600', color: '#1e293b' }}>Search Relevance Explanation</h4>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: '#334155', lineHeight: '1.5' }}>{explanation.explanation}</p>
+              </div>
+
+              {explanation.why_results_match && explanation.why_results_match.length > 0 && (
+                <div>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: '0.875rem', fontWeight: '600', color: '#475569' }}>Why these results match:</h4>
+                  <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {explanation.why_results_match.map((reason: string, idx: number) => (
+                      <li key={idx} style={{ fontSize: '0.875rem', color: '#475569', lineHeight: '1.4' }}>{reason}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {explanation.suggested_next_queries && explanation.suggested_next_queries.length > 0 && (
+                <div>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: '0.8125rem', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Suggested Next Queries</h4>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {explanation.suggested_next_queries.map((q: string, idx: number) => (
+                      <button
+                        key={idx}
+                        onClick={() => { setQuery(q); }}
+                        style={{
+                          backgroundColor: '#ffffff',
+                          color: '#2563eb',
+                          border: '1px solid #e2e8f0',
+                          padding: '6px 12px',
+                          borderRadius: '20px',
+                          fontSize: '0.8125rem',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.borderColor = '#2563eb'}
+                        onMouseOut={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           {results.map((item, idx) => (
             <div key={idx} style={{ backgroundColor: '#ffffff', padding: '24px', borderRadius: '12px', border: '1px solid #f3f4f6', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', transition: 'transform 0.15s ease, box-shadow 0.15s ease' }}
                  onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.05)'; }}
@@ -147,9 +269,13 @@ export const SearchPage: React.FC = () => {
                     <Highlight text={item.title} query={query} />
                   </Link>
                   <div style={{ fontSize: '0.8125rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ backgroundColor: '#f3f4f6', padding: '2px 8px', borderRadius: '12px', fontWeight: '500', color: '#4b5563' }}>{item.course || 'General'}</span>
+                    <span style={{ backgroundColor: '#f3f4f6', padding: '2px 8px', borderRadius: '12px', fontWeight: '500', color: '#4b5563' }}>
+                      {item.course_code || item.course?.code || 'General'}
+                    </span>
                     <span>•</span>
-                    <span>{item.document_type || 'Document'}</span>
+                    <span>
+                      {typeof item.document_type === 'string' ? item.document_type : (item.document_type?.name || 'Document')}
+                    </span>
                     <span>•</span>
                     <span>{new Date(item.created_at || Date.now()).getFullYear()}</span>
                   </div>

@@ -69,7 +69,10 @@ def list_documents(
     if semester_id:
         q = q.filter(Document.semester_id == semester_id)
     if status:
-        q = q.filter(Document.status == status)
+        if status.lower() == "approved":
+            q = q.filter(Document.is_approved == True)
+        else:
+            q = q.filter(Document.status == status)
     if title:
         q = q.filter(Document.title.ilike(f"%{title}%"))
     if extraction_method:
@@ -223,23 +226,28 @@ def search(
 
 @router.get("/search/semantic", response_model=list[SemanticSearchResult])
 def api_search_semantic(
-    query: str,
+    q: str | None = None,
+    query: str | None = None,
     course_id: UUID | None = None,
     document_type_id: UUID | None = None,
     limit: int = 10,
     current_user: User | None = Depends(get_current_user_optional),
     db: Session = Depends(get_db)
 ):
+    search_term = q or query
+    if not search_term:
+        raise HTTPException(status_code=400, detail="Search query 'q' or 'query' parameter is required.")
+        
     import time
     start_time = time.time()
     
-    results = search_semantic(db, query, limit=limit, course_id=course_id, document_type_id=document_type_id, current_user=current_user)
+    results = search_semantic(db, search_term, limit=limit, course_id=course_id, document_type_id=document_type_id, current_user=current_user)
     
     try:
         response_time_ms = (time.time() - start_time) * 1000.0
         log_entry = SearchLog(
             user_id=current_user.id if current_user else None,
-            query_text=query,
+            query_text=search_term,
             search_type="semantic",
             result_count=len(results),
             response_time_ms=response_time_ms
@@ -254,23 +262,28 @@ def api_search_semantic(
 
 @router.get("/search/hybrid", response_model=list[HybridSearchResult])
 def api_search_hybrid(
-    query: str,
+    q: str | None = None,
+    query: str | None = None,
     course_id: UUID | None = None,
     document_type_id: UUID | None = None,
     limit: int = 10,
     current_user: User | None = Depends(get_current_user_optional),
     db: Session = Depends(get_db)
 ):
+    search_term = q or query
+    if not search_term:
+        raise HTTPException(status_code=400, detail="Search query 'q' or 'query' parameter is required.")
+        
     import time
     start_time = time.time()
     
-    results = search_hybrid(db, query, limit=limit, course_id=course_id, document_type_id=document_type_id, current_user=current_user)
+    results = search_hybrid(db, search_term, limit=limit, course_id=course_id, document_type_id=document_type_id, current_user=current_user)
     
     try:
         response_time_ms = (time.time() - start_time) * 1000.0
         log_entry = SearchLog(
             user_id=current_user.id if current_user else None,
-            query_text=query,
+            query_text=search_term,
             search_type="hybrid",
             result_count=len(results),
             response_time_ms=response_time_ms

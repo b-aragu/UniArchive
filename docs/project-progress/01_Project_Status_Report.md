@@ -31,6 +31,9 @@ This report provides a high-level overview of the current status of the **UniArc
 | **Phase 10**| Frontend Implementation (React/TS/Vite) | 15% | ✅ Complete | July 05, 2026 |
 | **Phase 11**| Final Testing, Demo Prep & Deployment | 15% | ✅ E2E Complete | July 15, 2026 |
 | **Phase 12**| Dynamic Filtering & Live Metadata | 5% | ✅ Complete | June 4, 2026 |
+| **Phase 13**| AI Study Assistant Integration | 5% | ✅ Complete | June 4, 2026 |
+| **Phase 14**| MVP Stability, Sync, & UI Polish | 5% | ✅ Complete | June 4, 2026 |
+
 
 ---
 
@@ -47,6 +50,9 @@ This report provides a high-level overview of the current status of the **UniArc
 10. **Duplicate Detection:** Integrated perceptual hashing (`pHash`) and Jaccard text similarity to intercept uploads and flag near-duplicates securely without blocking user interactions.
 11. **E2E Integration Verified:** Successfully executed the Phase 11 full pipeline tests. The backend and frontend are entirely stable and interoperable. The passlib bcrypt crash bug was isolated and repaired.
 12. **Dynamic Metadata Filtering:** Replaced hardcoded document filter dropdown selections on the frontend with dynamically loaded backend options (`GET /api/documents/filter-options`), incorporating dynamic fallback labels and empty state handling.
+13. **AI Study Assistant Integration:** Implemented low-overhead REST connections to Groq and Gemini (via HTTPX), supporting mock/demo fallback behavior when credentials are missing. Integrated summary generation, study revision questions with show/hide answer toggles, and relevance explanation cards into the Document Detail and Search pages.
+14. **MVP Stability, Synchronization, & UI Polish:** Resolved student document visibility discrepancies by checking `is_approved == True` on approved statuses. Refactored search APIs to accept interchangeable parameters (`q` vs. `query`) to prevent 422 validation errors. Configured React main layout router outlet with `ErrorBoundary` shields.
+
 
 ---
 
@@ -94,6 +100,9 @@ No technical blockers are currently delaying the project. The following risks ar
 *   [`19_End_To_End_MVP_Verification_Report.md`](./19_End_To_End_MVP_Verification_Report.md)
 *   [`20_Final_UI_Functionality_Polish_Report.md`](./20_Final_UI_Functionality_Polish_Report.md)
 *   [`26_Dynamic_Documents_Filters_Report.md`](./26_Dynamic_Documents_Filters_Report.md)
+*   [`27_AI_Study_Assistant_Report.md`](./27_AI_Study_Assistant_Report.md)
+*   [`28_Final_Stability_Sync_UI_Report.md`](./28_Final_Stability_Sync_UI_Report.md)
+
 
 ### Final Report & Demo
 *   [`../final-report/Chapter1_Introduction.md`](../final-report/Chapter1_Introduction.md)
